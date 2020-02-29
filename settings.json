@@ -1,0 +1,8 @@
+{
+  "formats_to_rip": [".jpg", ".jpeg", ".png", ".gif", ".webm", ".mp4"],
+  "logging": "true",
+  "download_directory": "C:\\Users\\workstation\\Desktop\\lil ripper projektas\\lil-ripper\\test download",
+  "reddit_batch_size": 1000,
+  "time_interval_in_days": 7,
+  "sleep_time_in_seconds": 0
+}
