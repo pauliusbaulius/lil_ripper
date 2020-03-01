@@ -1,7 +1,8 @@
 from datetime import datetime
 from datetime import timedelta
 
-from modules import test_nsfw
+from source.modules import test_nsfw
+
 
 import signal
 import requests
@@ -23,10 +24,11 @@ def add_post_data_database(subreddit_name, json_link):
     """
     global total_db_updates
     global iteration_db_updates
+
     json_data = requests.get(json_link).json()
     # todo handle db errors!
     # todo take database name from args or settings.json
-    db_connection = sqlite3.connect("../test.db")
+    db_connection = sqlite3.connect("/home/joe/github/lil_ripper/test.db")
     db_cursor = db_connection.cursor()
     db_rows = db_cursor.rowcount
     # Add each post as separate entry to db
@@ -61,6 +63,9 @@ def pushshift_get_parse_add_timed(subreddit_name, time_from, time_to):
     :param subreddit_name: Name of subreddit as string value
     :return: List of lists containing json urls.
     """
+
+    subreddit_name = fix_subreddit_name(subreddit_name)
+
     # Iterate downwards until we reach the end and error will be thrown, since no posts will be found in json file.
     try:
         # It just works - Todd Howard
@@ -80,6 +85,20 @@ def pushshift_get_parse_add_timed(subreddit_name, time_from, time_to):
         print(f"subreddit [{subreddit_name}] does not exist,")
 
 
+def fix_subreddit_name(subreddit_name):
+    """
+    Since sqlite does not support tables starting with a digit, we have to append something before that.
+    This lil function appends "_" to the start of subreddit name if it starts with digit, and it also
+    removes "_" if it finds it in the given string. So this one function can add and remove "_".
+    """
+    if subreddit_name[0].isdigit():
+        return "_" + subreddit_name
+    elif subreddit_name.startswith("_"):
+        return subreddit_name[1:]
+    else:
+        return subreddit_name
+
+
 def update_db(subreddit_name):
     """
     Tries to find all posts and add their data to database for further processing.
@@ -88,15 +107,21 @@ def update_db(subreddit_name):
     """
     # For time measurement, prints total time taken by this function, even when it is cancelled.
     start_time = time.time()
+    subreddit_name = fix_subreddit_name(subreddit_name)
+
     try:
         # todo get db name from settings! not hardcoded
         # todo put db connection and etc to separate function for DRY
-        db_connection = sqlite3.connect("../test.db")
+        db_connection = sqlite3.connect("/home/joe/github/lil_ripper/test.db")
         db_cursor = db_connection.cursor()
         # Creates table if doesn't exist. Otherwise it will not work if subreddit was not archived before.
+        # todo FAILS TO CREATE IF SUBREDDIT STARTS WITH A NUMBER!
+        # todo arba visas tables pradet su _ arba handlint kazkaip...
+
         db_cursor.execute(
             '''CREATE TABLE IF NOT EXISTS {} (post_id TEXT PRIMARY KEY, created_utc INTEGER, url TEXT, author TEXT, title BLOB, status TEXT)'''.format(
                 subreddit_name))
+
         # Get highest utc and lowest utc from db, to skip parsing json data for existing entries, saves time. Let's resume.
         db_cursor.execute(f'''SELECT MAX(created_utc) FROM {subreddit_name}''')
         highest_db_utc = db_cursor.fetchone()[0]
@@ -106,7 +131,7 @@ def update_db(subreddit_name):
             highest_db_utc = 1
         # Parse new data
         pushshift_get_parse_add_timed(subreddit_name, int(time.time()), highest_db_utc)
-        db_connection = sqlite3.connect("../test.db")
+        db_connection = sqlite3.connect("/home/joe/github/lil_ripper/test.db")
         db_cursor = db_connection.cursor()
         db_cursor.execute(f'''SELECT MIN(created_utc) FROM {subreddit_name}''')
         lowest_db_utc = db_cursor.fetchone()[0]
@@ -120,20 +145,12 @@ def update_db(subreddit_name):
         print("program manually stopped.")
     finally:
         elapsed_time = time.time() - start_time
-        # todo neveikia mes iteration_db_updates gets set to 0 before this prints
-        print(
-            f"updated r/{subreddit_name} database and added/updated {iteration_db_updates} lines in {timedelta(seconds=round(elapsed_time))}. FALSE DATA! IGNORE!")
-        print(f"total {total_db_updates} of read/write operations to the db in this run.")
+        print(f"indexed this subreddit in {timedelta(seconds=round(elapsed_time))}. \ntotal {total_db_updates} of read/write operations to the db in this run.")
 
 
 if __name__ == "__main__":
     # TESTING GROUNDS! lil parser is working 8-)
-    #update_db("gonxxewild")
     subs = test_nsfw.parse_scroller_subs()
-    #todo this can be parallelized 8-)
+    # todo this can be parallelized 8-)
     for x in subs:
         update_db(x)
-
-
-# todo concurrency https://stackoverflow.com/questions/18207193/concurrent-writing-with-sqlite3
-# spawn multiple processes

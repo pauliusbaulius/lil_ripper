@@ -1,15 +1,15 @@
 import os
 import requests
 import json
-from modules import imgur
-from modules import gfycat
+from source.modules import imgur
+from source.modules import gfycat
 import time
 
 total_session_downloads = 0
 
 
 def load_settings():
-    with open(r"../settings.json") as json_file: #todo see if it works on leenox
+    with open(r"/home/joe/github/lil_ripper/settings.json") as json_file: #todo see if it works on leenox
         settings = json.load(json_file)
     return settings
 

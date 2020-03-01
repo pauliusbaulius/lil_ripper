@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 import os
 
-from modules import tools
-from modules.tools import parse_link
+from source.modules import tools
+from source.modules.tools import parse_link
 
 total_downloads = 0
 
@@ -69,7 +69,7 @@ def archive_subreddit(subreddit):
 
 
 # todo delet after testing :)
-archive_subreddit("nsfw_gifs")
+archive_subreddit("dankmemes")
 
 # todo downloading gfycat video [https://imgur.com/TchWpq4] - nesiuncia jei ne albumas ir neturi ending iskarto.
 

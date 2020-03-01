@@ -1,6 +1,6 @@
 import praw
-from modules import tools
-from modules.tools import parse_link
+from source.modules import tools
+from source.modules.tools import parse_link
 import time
 
 

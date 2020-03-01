@@ -1,5 +1,4 @@
 import os
-from modules import reddit
 
 #todo sum all file sizes and print at the end
 #todo option to compress png/jpg and then show before -> after -> how much % saved as print like 500KB to 123KB [73% saved]
@@ -13,6 +12,7 @@ welcome = """
 """
 print(welcome)
 
+# todo take user input here and decide what to do
 
 def execute_riplist():
     """
