@@ -1,4 +1,4 @@
-from source.modules import tools
+from modules import tools
 from bs4 import BeautifulSoup
 import requests
 
@@ -22,9 +22,10 @@ def extract_gfycat_direct_link(url):
     try:
         r = requests.get(url)
         soup = BeautifulSoup(r.text, "html.parser")
-        return soup.find("meta", property="og:video")["content"]  # bs4 to get that video link.
+        # bs4 to get that video link.
+        return soup.find("meta", property="og:video")["content"]
     except Exception:
-        print("failed to download gfycat file...")
+        print("Failed to download gfycat file...")
 
 
 

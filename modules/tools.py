@@ -1,27 +1,47 @@
 import os
+import sqlite3
 import requests
 import json
-from source.modules import imgur
-from source.modules import gfycat
+from modules import imgur, gfycat
 from datetime import datetime
 import time
+from definitions import ROOT_DIR
 
 total_session_downloads = 0
 
 
+def load_csv(csv_name):
+    with open(csv_name) as f:
+        content = f.readlines()
+    # you may also want to remove whitespace characters like `\n` at the end of each line
+    content = [x.strip() for x in content]
+    return content
+
+
+def get_db_connection():
+    database = load_settings()["database"]
+    database_path = os.path.join(ROOT_DIR, database)
+    try:
+        return sqlite3.connect(database_path)
+    except sqlite3.Error as error:
+        print(f"Could not open database: [{error}]")
+
+
 def load_settings():
-    # todo use relative positioning!
-    with open(r"/home/joe/github/lil_ripper/settings.json") as json_file:
+    settings_path = os.path.join(ROOT_DIR, "settings.json")
+    with open(settings_path) as json_file:
         settings = json.load(json_file)
     return settings
 
 
+download_directory = load_settings()["download_directory"]
 downloadable_formats = load_settings()["formats_to_rip"]
 
 
-def create_dir(folder_name, save_path=os.getcwd()):
+# todo to remove save_path, check for download_cirectory. it should also check for flags!
+def create_dir(folder_name, save_path=download_directory):
     """
-    Creates directory in save path. If no save path is given, current working dir is used.
+    Creates directory in save path. If no save path is given, default directory is used.
     Directory name is a given parameter.
     """
     directory = os.path.join(save_path, folder_name)
@@ -54,7 +74,6 @@ def download_file(url, directory):
         if str(url).endswith(tuple(downloadable_formats)):  # check if it ends with valid format for direct download
             # todo check headers to not download files under 2KB https://stackoverflow.com/questions/14270698/get-file-size-using-python-requests-while-only-getting-the-header
             req = requests.get(url)
-            # todo use this for filename now, later use hash
             filename = str(url).split("/")[-1]
             # Convert .gifv to .mp4
             if str(url).endswith(".gifv") and ".mp4" in tuple(downloadable_formats):
@@ -130,16 +149,15 @@ def json_try(json_url, directory):
         print("Analyzing .json has failed...")
 
 
-def archive_subreddit(subreddit, min_upvotes=0):
+def rip_subreddit(subreddit, min_upvotes=0):
     """
     Basically eina nuo dabartinio timestamp iki subreddit creation date in one week interval.
     """
     global total_session_downloads
+    global download_directory
     day_in_seconds = 24 * 60 * 60
-    save_path = create_dir(load_settings()["download_directory"])
     reddit_batch_size = load_settings()["reddit_batch_size"]
     time_interval = load_settings()["time_interval_in_days"] * day_in_seconds
-    directory = create_dir(os.path.join(save_path, subreddit))  # creates dir using subreddit name
 
     # todo find out how to get subreddit creation date without reddit account!
     #creation_date = int(reddit.subreddit(subreddit).created_utc)
@@ -147,18 +165,27 @@ def archive_subreddit(subreddit, min_upvotes=0):
     current_time = int(time.time())
     iterator = 0
 
+    # todo get shit from database instead!
     while creation_date <= current_time:
         previous_date = current_time - time_interval
         print("from {} to {} is batch {}. Batch size is {} posts.".format(datetime.utcfromtimestamp(current_time), datetime.utcfromtimestamp(previous_date), iterator, reddit_batch_size))
         json_link = "https://api.pushshift.io/reddit/search/submission/?subreddit={}&sort=desc&sort_type=created_utc&after={}&before={}&size={}".format(subreddit, previous_date, current_time, reddit_batch_size)
-        json_try(json_link, directory)
+        json_try(json_link, download_directory)
         current_time -= time_interval
         iterator += 1
 
     print(f"Downloaded [{total_session_downloads}] files in this session.")
 
+# todo remove directory and just look for --output flag dir or use default one!
+# todo downloading gfycat video [https://imgur.com/TchWpq4] - nesiuncia jei ne albumas ir neturi ending iskarto.
+# todo https://redgifs.com/watch/quarrelsomemadarieltoucan
+#todo https://imgur.com/z5ixEXI.gifv
+# todo take input arguments -> able to start multiple instances then
+# input argument to use riplist.txt or just state --subreddit lithuania hentai_gifs --batch 1000
+# ? first get all json files with links, extract downloadable shit and divide work
+# todo multiprocessing https://www.youtube.com/watch?v=RR4SoktDQAw
 
 if __name__ == "__main__":
     print("Running directly as tools.py!")
-    archive_subreddit("gonewild")
+    rip_subreddit("gonewild")
 

@@ -1,7 +1,6 @@
 import requests
-import re
 import os
-from source.modules import tools
+from modules import tools
 
 """
 Since imgur wants you to create user account to access read-only api which also required to give your email and phone number,

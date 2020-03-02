@@ -129,5 +129,7 @@ dmypy.json
 .pyre/
 
 # My stuff
-test.db
 testing_grounds/
+downloads/
+databases/ripper.db
+nsfw_subs.csv
