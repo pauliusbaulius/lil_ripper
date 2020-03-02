@@ -1,4 +1,5 @@
 {
+  "database": "databases/ripper.db",
   "formats_to_rip": [".jpg", ".jpeg", ".png", ".gif", ".webm", ".mp4"],
   "logging": "true",
   "download_directory": "/home/joe/github/lil_ripper/testing_grounds",

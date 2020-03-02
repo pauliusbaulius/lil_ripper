@@ -97,7 +97,7 @@ def download_imgur_album(url, directory=os.getcwd()):
     :param directory: directory where files will be saved. default is current dir.
     """
     try:
-        album_name = get_album_id(url)
+        album_name = "imgur_" + get_album_id(url)
         file_urls = find_all_album_media(url)
         if file_urls is not None:
             album_directory = os.path.join(directory, album_name)
@@ -110,8 +110,10 @@ def download_imgur_album(url, directory=os.getcwd()):
         print("imgur album does not exist anymore, skipping...")
 
 
-def download_imgur_albums():
+def download_imgur_albums(url):
     # todo read from riplist.csv and rip all albums where first column is imguralbum
+    if is_imgur_album(url):
+        print("Is imgur album, will download pictures...")
     pass
 
 

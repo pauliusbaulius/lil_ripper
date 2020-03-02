@@ -1,9 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
-
 from source.modules import test_nsfw
-
-
 import signal
 import requests
 import time
@@ -12,6 +9,7 @@ import sqlite3
 # Global var to track total insertions to db. Clean code preachers hate him.
 total_db_updates = 0
 iteration_db_updates = 0
+
 
 def add_post_data_database(subreddit_name, json_link):
     """
@@ -26,32 +24,27 @@ def add_post_data_database(subreddit_name, json_link):
     global iteration_db_updates
 
     json_data = requests.get(json_link).json()
-    # todo handle db errors!
     # todo take database name from args or settings.json
-    db_connection = sqlite3.connect("/home/joe/github/lil_ripper/test.db")
-    db_cursor = db_connection.cursor()
-    db_rows = db_cursor.rowcount
-    # Add each post as separate entry to db
-    removed_post = 0
-    for post in json_data["data"]:
-        try:
-            # If this is present in post json, it was removed, skip it.
-            post["removed_by_category"]
-            removed_post += 1
-        except KeyError:
+
+    with sqlite3.connect("/home/joe/github/lil_ripper/test.db") as db_connection:
+        db_cursor = db_connection.cursor()
+        db_rows = db_cursor.rowcount
+        # Add each post as separate entry to db
+        for post in json_data["data"]:
             try:
-                # todo this db query is not safe from injection attacks and usernames that kill queries 8-)
-                db_cursor.execute(
-                    f'''INSERT OR REPLACE INTO {subreddit_name} VALUES ("{post["id"]}", {post["created_utc"]}, "{post["url"]}", "{post["author"]}", "{post["title"]}", NULL)''')
+                sql_query_insert = f"""
+                    INSERT OR REPLACE INTO {subreddit_name} 
+                    VALUES ("{post["id"]}", {post["created_utc"]}, "{post["url"]}", "{post["author"]}", "{post["title"]}", NULL)
+                    """
+                db_cursor.execute(sql_query_insert)
                 # If new row was added, increment total.
                 if db_rows < db_cursor.rowcount:
                     iteration_db_updates += 1
                     # todo idk why there are exceptions but this fixes. due to formatting. fix execute query.
             except Exception:
                 pass
-    db_connection.commit()
-    db_connection.close()
-    total_db_updates += iteration_db_updates
+        db_connection.commit()
+        total_db_updates += iteration_db_updates
     return json_data["data"][-1].get("created_utc")
 
 
@@ -107,40 +100,46 @@ def update_db(subreddit_name):
     """
     # For time measurement, prints total time taken by this function, even when it is cancelled.
     start_time = time.time()
+    # Handles the problem with database names cannot start with integer but subreddits can...
     subreddit_name = fix_subreddit_name(subreddit_name)
 
     try:
-        # todo get db name from settings! not hardcoded
-        # todo put db connection and etc to separate function for DRY
-        db_connection = sqlite3.connect("/home/joe/github/lil_ripper/test.db")
-        db_cursor = db_connection.cursor()
-        # Creates table if doesn't exist. Otherwise it will not work if subreddit was not archived before.
-        # todo FAILS TO CREATE IF SUBREDDIT STARTS WITH A NUMBER!
-        # todo arba visas tables pradet su _ arba handlint kazkaip...
-
-        db_cursor.execute(
-            '''CREATE TABLE IF NOT EXISTS {} (post_id TEXT PRIMARY KEY, created_utc INTEGER, url TEXT, author TEXT, title BLOB, status TEXT)'''.format(
-                subreddit_name))
-
-        # Get highest utc and lowest utc from db, to skip parsing json data for existing entries, saves time. Let's resume.
-        db_cursor.execute(f'''SELECT MAX(created_utc) FROM {subreddit_name}''')
-        highest_db_utc = db_cursor.fetchone()[0]
-        db_connection.close()
-        # If there is nothing in db, start downloading everything.
-        if highest_db_utc is None:
-            highest_db_utc = 1
-        # Parse new data
-        pushshift_get_parse_add_timed(subreddit_name, int(time.time()), highest_db_utc)
-        db_connection = sqlite3.connect("/home/joe/github/lil_ripper/test.db")
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f'''SELECT MIN(created_utc) FROM {subreddit_name}''')
-        lowest_db_utc = db_cursor.fetchone()[0]
-        # todo figure out how to close connection sooner, or is it not a big deal?
-        db_connection.close()
-        # Parse old data if doesn't exist. Should stop directly if there is nothing to parse.
-        pushshift_get_parse_add_timed(subreddit_name, lowest_db_utc, 1)
-        # Handle ctrl+c
-        signal.signal(signal.SIGINT, signal.default_int_handler)
+        with sqlite3.connect("/home/joe/github/lil_ripper/test.db") as db_connection:
+            # todo get db name from settings! not hardcoded
+            db_cursor = db_connection.cursor()
+            # Creates table if doesn't exist. Otherwise it will not work if subreddit was not archived before.
+            sql_query_table = f"""
+            CREATE TABLE IF NOT EXISTS {subreddit_name} 
+            (post_id TEXT PRIMARY KEY, created_utc INTEGER, url TEXT, author TEXT, title BLOB, status TEXT)
+            """
+            # todo also add upvotes! score:
+            sql_query_table_new = f"""
+            CREATE TABLE IF NOT EXISTS {subreddit_name} 
+            (post_id TEXT PRIMARY KEY, created_utc INTEGER, score INTEGER, author TEXT, title BLOB, url TEXT, status TEXT)
+            """
+            sql_query_time_max = f"""
+            SELECT MAX(created_utc) 
+            FROM {subreddit_name}
+            """
+            sql_query_time_min = f"""
+            SELECT MIN(created_utc) 
+            FROM {subreddit_name}
+            """
+            db_cursor.execute(sql_query_table)
+            # Get highest utc and lowest utc from db, to skip parsing json data for existing entries, saves time. Let's resume.
+            db_cursor.execute(sql_query_time_max)
+            highest_db_utc = db_cursor.fetchone()[0]
+            # If there is nothing in db, start downloading everything.
+            if highest_db_utc is None:
+                highest_db_utc = 1
+            # Parse new data
+            pushshift_get_parse_add_timed(subreddit_name, int(time.time()), highest_db_utc)
+            db_cursor.execute(sql_query_time_min)
+            lowest_db_utc = db_cursor.fetchone()[0]
+            # Parse old data if doesn't exist. Should stop directly if there is nothing to parse.
+            pushshift_get_parse_add_timed(subreddit_name, lowest_db_utc, 1)
+            # Handle ctrl+c
+            signal.signal(signal.SIGINT, signal.default_int_handler)
     except KeyboardInterrupt:
         print("program manually stopped.")
     finally:

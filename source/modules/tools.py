@@ -3,13 +3,15 @@ import requests
 import json
 from source.modules import imgur
 from source.modules import gfycat
+from datetime import datetime
 import time
 
 total_session_downloads = 0
 
 
 def load_settings():
-    with open(r"/home/joe/github/lil_ripper/settings.json") as json_file: #todo see if it works on leenox
+    # todo use relative positioning!
+    with open(r"/home/joe/github/lil_ripper/settings.json") as json_file:
         settings = json.load(json_file)
     return settings
 
@@ -25,17 +27,17 @@ def create_dir(folder_name, save_path=os.getcwd()):
     directory = os.path.join(save_path, folder_name)
     if not os.path.exists(directory):
         os.mkdir(directory)
-        print("new directory [{}] was created.".format(directory))
+        print(f"New directory [{directory}] was created.")
     return directory
 
 
 def check_for_dupes(directory, filename):
     """
-    Checkes wheter a file with given filename already exists to not have to download it.
+    Checks whether a file with given filename already exists to not have to download it.
     """
     full_path = os.path.join(directory, filename)
     if os.path.exists(full_path):
-        print("file [{}] already exists, skipping download...".format(filename))
+        print("File [{}] already exists, skipping download...".format(filename))
         return True
 
 
@@ -50,9 +52,10 @@ def download_file(url, directory):
     global total_session_downloads
     try:
         if str(url).endswith(tuple(downloadable_formats)):  # check if it ends with valid format for direct download
-            req = requests.get(url) # todo check headers to not download files under 2KB https://stackoverflow.com/questions/14270698/get-file-size-using-python-requests-while-only-getting-the-header
-            filename = str(url).split("/")[-1]  # use this for filename now, later use hash
-
+            # todo check headers to not download files under 2KB https://stackoverflow.com/questions/14270698/get-file-size-using-python-requests-while-only-getting-the-header
+            req = requests.get(url)
+            # todo use this for filename now, later use hash
+            filename = str(url).split("/")[-1]
             # Convert .gifv to .mp4
             if str(url).endswith(".gifv") and ".mp4" in tuple(downloadable_formats):
                 filename = filename.replace(".gifv", ".mp4")
@@ -63,14 +66,14 @@ def download_file(url, directory):
                     f.write(req.content)
                     size = sizeof_fmt(os.fstat(f.fileno()).st_size)
                     f.close()
-                    print("downloaded [{}] with size of {}".format(url, size))
+                    print(f"Downloaded [{url}] with size of {size}.")
                     total_session_downloads += 1
             else:
-                print("file [{}] was not downloaded...".format(url))
+                print(f"File [{url}] was not downloaded...")
 
     except Exception:
         # todo fix this band-aid exception, it works but well, it doesn't really tell why the problem happened.
-        print("downloading [{}] has failed, skipping...".format(url))
+        print(f"Downloading [{url}] has failed, skipping...")
 
 
 """ Stuff I finessed on Stackoverflow and etc."""
@@ -90,7 +93,7 @@ def sizeof_fmt(num, suffix='B'):
 
 def parse_link(url, directory):
     """
-    Checks url and sends it to a method that handles downloading.
+    Checks url and sends it to the method that handles downloading.
     """
     sleep_time_in_seconds = load_settings()["sleep_time_in_seconds"]
     time.sleep(sleep_time_in_seconds)
@@ -100,14 +103,62 @@ def parse_link(url, directory):
         download_file(url, directory)
     # If it is an imgur album...
     elif imgur.is_imgur_album(url):
-        print("downloading imgur album [{}]".format(url))
+        print(f"Downloading imgur album [{url}]")
         imgur.download_imgur_album(url, directory)
     # If it is gfycat link...
     elif gfycat.is_gfycat_link(url):
-        print("downloading gfycat video [{}]".format(url))
+        print(f"Downloading gfycat video [{url}]")
         gfycat.download_gfycat_video(url, directory)
     else:
-        print("cannot download this url yet [{}]".format(url))
+        print(f"Cannot download this url yet [{url}]")
 
 
+def json_try(json_url, directory):
+    """
+    Takes a json url and a directory, goes over json data and downloads media using parse_link()
+    :param json_url: url of json file containing post data from reddit
+    :param directory: directory where downloaded files are stored
+    :return:
+    """
+    try:
+        r = requests.get(json_url)
+        json_data = r.json()
+        link_data = json_data["data"]
+        for x in link_data:
+            parse_link(x["url"], directory)
+    except Exception:
+        print("Analyzing .json has failed...")
+
+
+def archive_subreddit(subreddit, min_upvotes=0):
+    """
+    Basically eina nuo dabartinio timestamp iki subreddit creation date in one week interval.
+    """
+    global total_session_downloads
+    day_in_seconds = 24 * 60 * 60
+    save_path = create_dir(load_settings()["download_directory"])
+    reddit_batch_size = load_settings()["reddit_batch_size"]
+    time_interval = load_settings()["time_interval_in_days"] * day_in_seconds
+    directory = create_dir(os.path.join(save_path, subreddit))  # creates dir using subreddit name
+
+    # todo find out how to get subreddit creation date without reddit account!
+    #creation_date = int(reddit.subreddit(subreddit).created_utc)
+    creation_date = 1
+    current_time = int(time.time())
+    iterator = 0
+
+    while creation_date <= current_time:
+        previous_date = current_time - time_interval
+        print("from {} to {} is batch {}. Batch size is {} posts.".format(datetime.utcfromtimestamp(current_time), datetime.utcfromtimestamp(previous_date), iterator, reddit_batch_size))
+        json_link = "https://api.pushshift.io/reddit/search/submission/?subreddit={}&sort=desc&sort_type=created_utc&after={}&before={}&size={}".format(subreddit, previous_date, current_time, reddit_batch_size)
+        json_try(json_link, directory)
+        current_time -= time_interval
+        iterator += 1
+
+    print(f"Downloaded [{total_session_downloads}] files in this session.")
+
+
+if __name__ == "__main__":
+    print("Running directly as tools.py!")
+    archive_subreddit("gonewild")
 
