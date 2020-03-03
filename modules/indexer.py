@@ -85,6 +85,7 @@ def download_data(subreddit_name, time_from, time_to, min_upvotes, database_loca
         print(f"Subreddit [{subreddit_name}] does not exist,")
 
 
+# todo remove default db after testing!
 def index_subreddit(subreddit_name, min_upvotes=0, database_location=tools.load_settings()["database"]):
     """
     Tries to find all posts and add their data to database for further processing.

@@ -1,6 +1,29 @@
 import os
 import requests
-from modules import imgur, gfycat
+from modules import imgur, gfycat, indexer
+
+
+def rip_subreddit(subreddit_name, continue_download, download_location, database_location, min_upvotes):
+    """
+    Given a subreddit name, tries to download all media files from links found in the database.
+    If subreddit table is not found, indexes it first before downloading.
+    Downloadable media file formats, default download location and database location can be changed in settings.json.
+    """
+    print("called rip_subreddit", subreddit_name, download_location, database_location, min_upvotes, continue_download)
+    # python3 lilripper.py -r dankmemes -u 100 --continue-download
+    # todo implement check for db, if needed update
+    # if not in db, index
+    # if in db, start downloading and setting status=1 if success
+    # if continue_download=False, ignore status! or set to 0
+    indexer.index_subreddit(subreddit_name, min_upvotes, database_location)
+
+
+def rip_all(continue_download, download_location):
+    """
+    Tries to download all media files from links found in database tables.
+    """
+    print("called rip_all", download_location, continue_download)
+    # todo just iterate over each table and
 
 
 def handle_url(url, directory, formats):
@@ -9,7 +32,7 @@ def handle_url(url, directory, formats):
     """
     # If it is a directly downloadable link ending in valid format.
     if is_downloadable(url, formats):
-        download_file(url, directory)
+        download_file(url, directory, formats)
     # If it is an imgur album...
     elif imgur.is_imgur_album(url):
         print(f"Downloading imgur album [{url}]")
@@ -17,7 +40,7 @@ def handle_url(url, directory, formats):
     # If it is gfycat link...
     elif gfycat.is_gfycat_link(url):
         print(f"Downloading gfycat video [{url}]")
-        gfycat.download_gfycat_video(url, directory)
+        gfycat.download_gfycat_video(url, directory, formats)
     else:
         print(f"Cannot download this url (yet): [{url}]")
 
@@ -29,13 +52,12 @@ def download_file(url, directory, formats):
             req = requests.get(url)
             filename = str(url).split("/")[-1]
             # Convert .gifv to .mp4
-            if str(url).endswith(".gifv") and ".mp4" in tuple(formats):
+            if str(url).endswith(".gifv") and "mp4" in tuple(formats):
                 filename = filename.replace(".gifv", ".mp4")
             # Check if already exists, if not, download file.
             if not check_for_dupes(directory, filename):
                 with open(os.path.join(directory, filename), "wb") as f:
                     f.write(req.content)
-                    f.close()
                     print(f"Downloaded [{url}].")
     except Exception:
         # todo fix this band-aid exception, it works but well, it doesn't really tell why the problem happened.

@@ -154,8 +154,7 @@ def rip_subreddit(subreddit, min_upvotes=0):
     day_in_seconds = 24 * 60 * 60
     reddit_batch_size = load_settings()["reddit_batch_size"]
     time_interval = load_settings()["time_interval_in_days"] * day_in_seconds
-    download_directory = create_dir(download_directory, subreddit)
-    print(download_directory)
+    download_directory = create_directory(download_directory, subreddit)
     # todo find out how to get subreddit creation date without reddit account!
     #creation_date = int(reddit.subreddit(subreddit).created_utc)
     creation_date = 1
@@ -173,25 +172,6 @@ def rip_subreddit(subreddit, min_upvotes=0):
 
     print(f"Downloaded [{total_session_downloads}] files in this session.")
 
-# todo remove directory and just look for --output flag dir or use default one!
-# todo downloading gfycat video [https://imgur.com/TchWpq4] - nesiuncia jei ne albumas ir neturi ending iskarto.
-# todo https://redgifs.com/watch/quarrelsomemadarieltoucan
-#todo https://imgur.com/z5ixEXI.gifv
-# todo take input arguments -> able to start multiple instances then
-# input argument to use riplist.txt or just state --subreddit lithuania hentai_gifs --batch 1000
-# ? first get all json files with links, extract downloadable shit and divide work
-# todo multiprocessing https://www.youtube.com/watch?v=RR4SoktDQAw
-# todo sum all file sizes and print at the end
-# todo option to compress png/jpg and then show before -> after -> how much % saved as print like 500KB to 123KB [73% saved]
-# https://gist.github.com/rigoneri/4716919
-# https://cloudinary.com/blog/image_optimization_in_python
-# https://shantanujoshi.github.io/python-image-compression/
-
-
-if __name__ == "__main__":
-    print("Running directly as tools.py!")
-    rip_subreddit("gonewild")
-
 
 def create_directory(base_dir, new_dir):
     """
@@ -208,3 +188,21 @@ def create_directory(base_dir, new_dir):
     else:
         print(f"Directory [{album_directory}] already exists.")
         return album_directory
+
+
+# todo remove directory and just look for --output flag dir or use default one!
+# todo downloading gfycat video [https://imgur.com/TchWpq4] - nesiuncia jei ne albumas ir neturi ending iskarto.
+# todo https://redgifs.com/watch/quarrelsomemadarieltoucan
+#todo https://imgur.com/z5ixEXI.gifv
+# todo take input arguments -> able to start multiple instances then
+# input argument to use riplist.txt or just state --subreddit lithuania hentai_gifs --batch 1000
+# ? first get all json files with links, extract downloadable shit and divide work
+# todo multiprocessing https://www.youtube.com/watch?v=RR4SoktDQAw
+# todo sum all file sizes and print at the end
+# todo option to compress png/jpg and then show before -> after -> how much % saved as print like 500KB to 123KB [73% saved]
+# https://gist.github.com/rigoneri/4716919
+# https://cloudinary.com/blog/image_optimization_in_python
+# https://shantanujoshi.github.io/python-image-compression/
+if __name__ == "__main__":
+    print("Running directly as tools.py!")
+    rip_subreddit("gonewild")
