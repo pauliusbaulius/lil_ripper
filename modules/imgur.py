@@ -1,5 +1,5 @@
 import requests
-from modules import downloader, tools
+from modules import downloader
 
 """
 Since imgur wants you to create user account to access read-only api which also required to give your email and phone number,
@@ -31,7 +31,7 @@ def download_imgur_album(url, directory, formats):
         album_image_urls = find_all_album_media(url)
         if album_image_urls is not None:
             # Create new dir with album id as name
-            album_directory = tools.create_directory(directory, album_name)
+            album_directory = downloader.create_directory(directory, album_name)
             for file_url in album_image_urls:
                 downloader.download_file(file_url, album_directory, formats)
                 #tools.download_file(file_url, album_directory)
@@ -108,7 +108,6 @@ def download_imgur_albums(url):
     # todo read from riplist.csv and rip all albums where first column is imguralbum
     if is_imgur_album(url):
         print("Is imgur album, will download pictures...")
-    pass
 
 
 if __name__ == "__main__":

@@ -1,15 +1,10 @@
-# lil parser - ripper
+# lil ripper
 
-A python program to archive subreddit media. Will handle most of media urls. C00mers dream - gonewild archived in a day.
-It is not a complete archival tool, since some media hosted on 3rd party weird sites will not be downloaded if it is not a direct link.
+A python program to index and download entire subreddits. *It is not a complete archival tool, since some media hosted on 3rd party weird sites will not be downloaded if it is not a direct link.*
 
-**lil parser** - given a list of subreddits, it will build a database table for subreddit containing all post url's it can find.
-Uses pushshift to download post json files, each one containing 1000 posts. Iterates downwards until subreddit creation date is reached.
-Uses SQLite for it's database.
 
-**lil ripper** - in progress... 
 
-## supported download links
+## Supported download links
 - [x] direct link ending in valid format
 - [x] i.reddit
 - [x] imgur direct link
@@ -17,46 +12,82 @@ Uses SQLite for it's database.
 - [ ] imgur album with one item aka no /a/ in link
 - [x] gfycat
 
-## usage
 
-lil parser takes a txt file with subreddits. Each line should be a subreddit.
-It also requires you to specify goal database.
-lil parser can be executed using *lilparser --input <your_file>.txt --database <db_name>.db*
 
-lil ripper takes database name and subreddit name. Will download yet not downloaded media.
+## Usage
 
-## settings.json -> use args
-- [ ] perkelt settings.json i cli arguments
+Works with Linux CLI. 
+
+```
+lilripper.py
+-r, --rip <subreddit(s), csv(s), db(s)> 
+	items you wish to use for indexing/ripping
+
+-i, --index <subreddit(s), csv(s)> 
+	items you wish to use for indexing
+	
+-u, --min-upvotes <integer> 
+	minimum upvotes to consider a post for ripping/indexing.
+	default minimum is 0 upvotes.
+
+-o, --output <path> 
+	location for downloads, empty will use default location
+
+-d, --database <path> 
+	location of db for indexing, empty will use default location
+
+-f, --formats <space separated extensions> 
+	formats to download
+
+--continue-download 
+	does not continue downloading from last download in database, looks for first 	downloaded=0 flag.
+
+--no-continue-download 
+	ignores flags, downloads from first to last entry in database
+
+--no-index 
+	does not build index before ripping, goes directly to downloading from newest to oldest post in subreddit(s)
+```
+
+
+
+## Examples
+
+```bash
+# download jpg, png, gif media files from posts with >= 1000 upvotes from r/dankmemes and put in downloads folder
+lilripper.py -r dankmemes -u 1000 --no-index -f jpg png gif -o /home/picklerick/downloads/
+
+# index subreddits in csv file, consider posts with >=5 upvotes only and put data in ripper.db
+lilripper.py -i cool_subs.csv -u 5 -d /home/pickerick/databases/ripper.db
+
+# index subreddit r/dankmemes and use default database and default upvote count.
+lilripper.py -i cool_subs.csv
+
+python lilripper.py -i dankmemes -u 1000 -d dankmemes_test.db
+```
+
+
+
+## settings.json
+**database**:
+
+​	Default location of index database.
 
 **formats_to_rip**:
-	Specify which formats to download. File formats not in this list will be ignored.
-
-**logging**:
-	If true, will create a log file of the operation. Can be done with leenox commands, but this is for n00bs.
+	Specify which default formats to download. File formats not in this list will be ignored.
 
 **download_directory**:
 	Absolute location where your stuff will be saved. Works as base directory, since each subreddit and imgur album will have their own folders.
-
-**reddit_batch_size**:
-	How many posts you want to fit in one JSON request. Maximum is 1000.
-
-**time_interval_in_days**:
-	For reddit downloader. Used together with reddit_batch_size. If you think a subreddit gets 1000 posts a day, make interval one day.    If it is a smallish subreddit, can go up to a month.
-
-**sleep_time_in_seconds**:
-	How many seconds to sleep between requests. 1 = 1s, 0.5 = half a second etc... If you don't want to get blacklisted, don't overload servers.    Especially with gfycat. It does blacklist IP from VPN if you abuse them. Happened a lot during testing.
 
 
 
 ## to-do
 
 - [ ] compress images to reduce storage usage
-- [ ] automatically delete `ìmage deleted` images from imgur...
-- [ ] rip from txt list with subreddits
+  - [ ] show compression gains
+- [x] rip from csv list with subreddits
 - [ ] show total network usage
-- [x] show total time
-- [ ] show compression gains
 - [x] continue-stop from certain time range instead of going from today to sub creation, takes a while to go thru already downloaded stuff.
 - [x] database containing information about posts
 - [x] new and improved pushshift iterator
-- [ ] call lil ripper using args in terminal
+- [x] call lil ripper using args in terminal

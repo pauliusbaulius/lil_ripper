@@ -1,4 +1,6 @@
 import os
+from datetime import time
+import time
 import requests
 from modules import imgur, gfycat, indexer
 
@@ -16,6 +18,23 @@ def rip_subreddit(subreddit_name, continue_download, download_location, database
     # if in db, start downloading and setting status=1 if success
     # if continue_download=False, ignore status! or set to 0
     indexer.index_subreddit(subreddit_name, min_upvotes, database_location)
+
+
+# todo lilripper.py -r dankmemes -u 1000 --no-index -f jpg png gif
+def rip_subreddit_no_index(subreddit_name, download_location, min_upvotes, formats):
+    time_from = int(time.time())
+    try:
+        # It just works - Todd Howard
+        while True and time_from > 1:
+            json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit_name}" \
+                        f"&sort=desc&sort_type=created_utc&before={time_from}&score=>{min_upvotes-1}&size=1000&is_self=false"
+            print(json_link)
+            json_data = requests.get(json_link).json()
+            json_try(json_link, download_location, formats)
+            time_from = json_data["data"][-1].get("created_utc")
+    except IndexError:
+        # When all json files are generated, break loop and finish.
+        print(f"All json url/s were generated, finished...")
 
 
 def rip_all(continue_download, download_location):
@@ -79,6 +98,53 @@ def check_for_dupes(directory, filename):
         return True
 
 
+def create_directory(base_dir, new_dir):
+    """
+    If directory does not exist, make one. Otherwise return already existing directory.
+    :param base_dir: base directory where to create new directory.
+    :param new_dir: name of the new directory.
+    :return: path to new/existing directory.
+    """
+    album_directory = os.path.join(base_dir, new_dir)
+    if not os.path.exists(album_directory):
+        os.mkdir(album_directory)
+        print(f"New directory [{album_directory}] was created.")
+        return album_directory
+    else:
+        print(f"Directory [{album_directory}] already exists.")
+        return album_directory
+
+
+def sizeof_fmt(num, suffix='B'):
+    """
+    https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+    Thanks to this dude.
+    """
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
+
+def json_try(json_url, directory, formats):
+    """
+    Takes a json url and a directory, goes over json data and downloads media using parse_link()
+    :param json_url: url of json file containing post data from reddit
+    :param directory: directory where downloaded files are stored
+    :return:
+    """
+    try:
+        r = requests.get(json_url)
+        json_data = r.json()
+        link_data = json_data["data"]
+        for x in link_data:
+            handle_url(x["url"], directory, formats)
+    except Exception:
+        print("Analyzing .json has failed...")
+
+
 if __name__ == "__main__":
     #handle_url("https://imgur.com/a/xzCD0wC", "/home/joe/github/lil_ripper/testing_grounds", ["jpg, png"])
-    download_file("https://imgur.com/HHDZK1t.jpg", "/home/joe/github/lil_ripper/testing_grounds/imgur_xzCD0wC", ["jpg"])
+    #download_file("https://imgur.com/HHDZK1t.jpg", "/home/joe/github/lil_ripper/testing_grounds/imgur_xzCD0wC", ["jpg"])
+    rip_subreddit_no_index("dankmemes", "C:\\Users\\workstation\\Desktop\\lil ripper github\\lil_ripper\\old_data\\test", 100, ["jpg", "png", "gif"])

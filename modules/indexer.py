@@ -71,7 +71,7 @@ def download_data(subreddit_name, time_from, time_to, min_upvotes, database_loca
             iteration += 1
             start_time = time.time()
             json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit_name}" \
-                        f"&sort=desc&sort_type=created_utc&before={time_from}&size=1000&is_self=false"
+                        f"&sort=desc&sort_type=created_utc&before={time_from}&score=>{min_upvotes-1}&size=1000&is_self=false"
             # Insert json data into the database.
             time_from = update_database(subreddit_name, json_link, min_upvotes=min_upvotes, database_location=database_location)
             elapsed_time = time.time() - start_time
@@ -86,7 +86,7 @@ def download_data(subreddit_name, time_from, time_to, min_upvotes, database_loca
 
 
 # todo remove default db after testing!
-def index_subreddit(subreddit_name, min_upvotes=0, database_location=tools.load_settings()["database"]):
+def index_subreddit(subreddit_name, database_location, min_upvotes=0):
     """
     Tries to find all posts and add their data to database for further processing.
     Resumes where left of by default. When started will get new posts and continue updating db with older posts until everything is archived.

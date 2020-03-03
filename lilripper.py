@@ -1,6 +1,6 @@
 import argparse
 import sys
-from modules import tools, ripper, indexer
+from modules import tools, indexer, downloader
 
 default_database = tools.load_settings()["database"]
 default_download = tools.load_settings()["download_directory"]
@@ -54,12 +54,14 @@ def handle_args(arguments):
         for item in arguments.index:
             if str(item).endswith(".csv"):
                 subreddits = tools.load_csv(item)
-                indexer.index_subreddits(subreddits=subreddits, min_upvotes=arguments.min_upvotes, default_database=arguments.database)
+                indexer.index_subreddits(subreddits=subreddits, min_upvotes=arguments.min_upvotes,
+                                         default_database=arguments.database)
             else:
-                indexer.index_subreddit(subreddit_name=arguments.index[0], min_upvotes=arguments.min_upvotes, database_location=arguments.database)
+                indexer.index_subreddit(subreddit_name=arguments.index[0], min_upvotes=arguments.min_upvotes,
+                                        database_location=arguments.database)
 
     # Handle ripping
-    if arguments.rip:
+    elif arguments.rip:
         print(f"Starting indexing and ripping: {', '.join(arguments.rip)}")
         for item in arguments.rip:
             # If it is a csv file, extract subreddits and pass to ripper one by one.
@@ -67,23 +69,23 @@ def handle_args(arguments):
                 subreddits = tools.load_csv(item)
                 for subreddit in subreddits:
                     # todo start indexing and then ripping
-                    ripper.rip_subreddit(subreddit_name=subreddit,
+                    downloader.rip_subreddit(subreddit_name=subreddit,
+                                             download_location=arguments.output,
+                                             database_location=arguments.database,
+                                             min_upvotes=arguments.min_upvotes,
+                                             continue_download=arguments.continue_download)
+            # todo handle different sqlite extensions!
+            # If it is a db, pass to db_ripper.
+            elif str(item).endswith(".db"):
+                downloader.rip_all(arguments.output)
+            # If it is subreddit or list of subs, pass them to ripper one by one.
+            else:
+                # todo start indexing and then ripping
+                downloader.rip_subreddit(subreddit_name=arguments.rip[0],
                                          download_location=arguments.output,
                                          database_location=arguments.database,
                                          min_upvotes=arguments.min_upvotes,
                                          continue_download=arguments.continue_download)
-            # todo handle different sqlite extensions!
-            # If it is a db, pass to db_ripper.
-            elif str(item).endswith(".db"):
-                ripper.rip_all(arguments.output)
-            # If it is subreddit or list of subs, pass them to ripper one by one.
-            else:
-                # todo start indexing and then ripping
-                ripper.rip_subreddit(subreddit_name=arguments.rip[0],
-                                     download_location=arguments.output,
-                                     database_location=arguments.database,
-                                     min_upvotes=arguments.min_upvotes,
-                                     continue_download=arguments.continue_download)
 
 
 if __name__ == "__main__":
