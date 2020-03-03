@@ -46,7 +46,7 @@ def handle_args(arguments):
     # print(arguments.output)
     # print(arguments.database)
     # print(arguments.continue_download)
-    # python3 main.py -i nsfw_subs.csv -u 5 -d /home/joe/github/lil_ripper/b.db 5
+    # python3  lilripper.py -i nsfw_subs.csv -u 5 -d /home/joe/github/lil_ripper/b.db 5
 
     # Handle indexing
     if arguments.index:

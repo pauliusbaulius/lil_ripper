@@ -43,17 +43,7 @@ download_directory = load_settings()["download_directory"]
 downloadable_formats = load_settings()["formats_to_rip"]
 
 
-# todo to remove save_path, check for download_cirectory. it should also check for flags!
-def create_dir(folder_name, save_path=download_directory):
-    """
-    Creates directory in save path. If no save path is given, default directory is used.
-    Directory name is a given parameter.
-    """
-    directory = os.path.join(save_path, folder_name)
-    if not os.path.exists(directory):
-        os.mkdir(directory)
-        print(f"New directory [{directory}] was created.")
-    return directory
+
 
 
 def check_for_dupes(directory, filename):
@@ -121,6 +111,7 @@ def parse_link(url, directory):
     """
     sleep_time_in_seconds = load_settings()["sleep_time_in_seconds"]
     time.sleep(sleep_time_in_seconds)
+
     # If it is a directly downloadable link ending in valid format.
     # If it is a .gifv and .mp4 is to be downloaded, use that extra ugly check.
     if str(url).endswith(tuple(downloadable_formats)) or str(url).endswith(".gifv") and ".mp4" in tuple(downloadable_formats):
@@ -134,7 +125,7 @@ def parse_link(url, directory):
         print(f"Downloading gfycat video [{url}]")
         gfycat.download_gfycat_video(url, directory)
     else:
-        print(f"Cannot download this url yet [{url}]")
+        print(f"Cannot download this url (yet): [{url}]")
 
 
 def json_try(json_url, directory):
@@ -201,3 +192,19 @@ if __name__ == "__main__":
     print("Running directly as tools.py!")
     rip_subreddit("gonewild")
 
+
+def create_directory(base_dir, new_dir):
+    """
+    If directory does not exist, make one. Otherwise return already existing directory.
+    :param base_dir: base directory where to create new directory.
+    :param new_dir: name of the new directory.
+    :return: path to new/existing directory.
+    """
+    album_directory = os.path.join(base_dir, new_dir)
+    if not os.path.exists(album_directory):
+        os.mkdir(album_directory)
+        print(f"New directory [{album_directory}] was created.")
+        return album_directory
+    else:
+        print(f"Directory [{album_directory}] already exists.")
+        return album_directory
