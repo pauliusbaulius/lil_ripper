@@ -56,7 +56,7 @@ def check_for_dupes(directory, filename):
         return True
 
 
-def download_file(url, directory):
+def download_file(url, directory, downloadable_formats=load_settings()["formats_to_rip"]):
     """
     Will download file given direct link to it. If it cannot download the file,
     it will print a message but won't halt the program. Checks if file is already donwloaded based on name, if it is
