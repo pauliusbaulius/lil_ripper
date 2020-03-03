@@ -18,9 +18,13 @@ def load_csv(csv_name):
     return content
 
 
-def get_db_connection():
-    database = load_settings()["database"]
-    database_path = os.path.join(ROOT_DIR, database)
+def get_db_connection(database_name):
+    # Check if default db has to be used, otherwise use new one.
+    if database_name == load_settings()["database"]:
+        database = load_settings()["database"]
+        database_path = os.path.join(ROOT_DIR, database)
+    else:
+        database_path = database_name
     try:
         return sqlite3.connect(database_path)
     except sqlite3.Error as error:
@@ -34,6 +38,7 @@ def load_settings():
     return settings
 
 
+# todo take from args!
 download_directory = load_settings()["download_directory"]
 downloadable_formats = load_settings()["formats_to_rip"]
 
@@ -158,7 +163,8 @@ def rip_subreddit(subreddit, min_upvotes=0):
     day_in_seconds = 24 * 60 * 60
     reddit_batch_size = load_settings()["reddit_batch_size"]
     time_interval = load_settings()["time_interval_in_days"] * day_in_seconds
-
+    download_directory = create_dir(download_directory, subreddit)
+    print(download_directory)
     # todo find out how to get subreddit creation date without reddit account!
     #creation_date = int(reddit.subreddit(subreddit).created_utc)
     creation_date = 1
@@ -184,6 +190,12 @@ def rip_subreddit(subreddit, min_upvotes=0):
 # input argument to use riplist.txt or just state --subreddit lithuania hentai_gifs --batch 1000
 # ? first get all json files with links, extract downloadable shit and divide work
 # todo multiprocessing https://www.youtube.com/watch?v=RR4SoktDQAw
+# todo sum all file sizes and print at the end
+# todo option to compress png/jpg and then show before -> after -> how much % saved as print like 500KB to 123KB [73% saved]
+# https://gist.github.com/rigoneri/4716919
+# https://cloudinary.com/blog/image_optimization_in_python
+# https://shantanujoshi.github.io/python-image-compression/
+
 
 if __name__ == "__main__":
     print("Running directly as tools.py!")

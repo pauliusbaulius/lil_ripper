@@ -3,6 +3,7 @@ import signal
 import requests
 import time
 from modules import tools
+import sys
 
 
 def fix_subreddit_name(subreddit_name):
@@ -19,7 +20,7 @@ def fix_subreddit_name(subreddit_name):
         return subreddit_name
 
 
-def update_database(subreddit_name, json_link, min_upvotes):
+def update_database(subreddit_name, json_link, min_upvotes, database_location):
     """
     Given a valid json url to reddit post data, it downloads the file and extracts data to db.
     Data added to db is post_id, created_utc, url, author and title.
@@ -36,7 +37,7 @@ def update_database(subreddit_name, json_link, min_upvotes):
                 """
     # Store post data here, insert into database when whole json is parsed to reduce needed db operations drastically.
     posts_to_insert = []
-    with tools.get_db_connection() as db_connection:
+    with tools.get_db_connection(database_location) as db_connection:
         db_cursor = db_connection.cursor()
         # Add each post as separate entry to db
         for post in json_data["data"]:
@@ -54,7 +55,7 @@ def update_database(subreddit_name, json_link, min_upvotes):
     return json_data["data"][-1].get("created_utc")
 
 
-def download_data(subreddit_name, time_from, time_to, min_upvotes):
+def download_data(subreddit_name, time_from, time_to, min_upvotes, database_location):
     """
     Given subreddit name, extracts all json urls containing post data.
     :param subreddit_name: Name of subreddit as string value
@@ -69,11 +70,13 @@ def download_data(subreddit_name, time_from, time_to, min_upvotes):
         while True and time_from > time_to:
             iteration += 1
             start_time = time.time()
-            json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit_name}&sort=desc&sort_type=created_utc&before={time_from}&size=1000&is_self=false"
+            json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit_name}" \
+                        f"&sort=desc&sort_type=created_utc&before={time_from}&size=1000&is_self=false"
             # Insert json data into the database.
-            time_from = update_database(subreddit_name, json_link, min_upvotes=min_upvotes)
+            time_from = update_database(subreddit_name, json_link, min_upvotes=min_upvotes, database_location=database_location)
             elapsed_time = time.time() - start_time
-            print(f"For r/{subreddit_name} in iteration [{iteration}] parsed [{json_link}] up to post on [{datetime.utcfromtimestamp(time_from)}] in {elapsed_time:.2f} seconds.")
+            print(f"For r/{subreddit_name} in iteration [{iteration}] parsed [{json_link}] up to post on "
+                  f"[{datetime.utcfromtimestamp(time_from)}] in {elapsed_time:.2f} seconds.")
     except IndexError:
         # When all json files are generated, break loop and finish.
         print(f"{iteration} json url/s were generated, finished...")
@@ -82,7 +85,7 @@ def download_data(subreddit_name, time_from, time_to, min_upvotes):
         print(f"Subreddit [{subreddit_name}] does not exist,")
 
 
-def index_subreddit(subreddit_name, min_upvotes=0):
+def index_subreddit(subreddit_name, min_upvotes=0, database_location=tools.load_settings()["database"]):
     """
     Tries to find all posts and add their data to database for further processing.
     Resumes where left of by default. When started will get new posts and continue updating db with older posts until everything is archived.
@@ -94,7 +97,7 @@ def index_subreddit(subreddit_name, min_upvotes=0):
     # Handles the problem with database names cannot start with integer but subreddits can...
     subreddit_name = fix_subreddit_name(subreddit_name)
     try:
-        with tools.get_db_connection() as db_connection:
+        with tools.get_db_connection(database_location) as db_connection:
             db_cursor = db_connection.cursor()
             # Creates table if doesn't exist. Otherwise it will not work if subreddit was not archived before.
             sql_query_table = f"""
@@ -117,18 +120,24 @@ def index_subreddit(subreddit_name, min_upvotes=0):
             if highest_db_utc is None:
                 highest_db_utc = 1
             # Parse new data
-            download_data(subreddit_name, int(time.time()), highest_db_utc, min_upvotes=min_upvotes)
+            download_data(subreddit_name, int(time.time()), highest_db_utc, min_upvotes=min_upvotes, database_location=database_location)
             # Parse old data if doesn't exist. Should stop directly if there is nothing to parse.
             db_cursor.execute(sql_query_time_min)
             lowest_db_utc = db_cursor.fetchone()[0]
-            download_data(subreddit_name, lowest_db_utc, 1, min_upvotes=min_upvotes)
+            download_data(subreddit_name, lowest_db_utc, 1, min_upvotes=min_upvotes, database_location=database_location)
             # Handle ctrl+c
             signal.signal(signal.SIGINT, signal.default_int_handler)
     except KeyboardInterrupt:
         print("Program manually stopped!")
+        sys.exit()
     finally:
         elapsed_time = time.time() - start_time
         print(f"Indexed this subreddit in {timedelta(seconds=round(elapsed_time))}.")
+
+
+def index_subreddits(subreddits, default_database, min_upvotes=0):
+    for subreddit in subreddits:
+        index_subreddit(subreddit, min_upvotes, default_database)
 
 
 if __name__ == "__main__":
