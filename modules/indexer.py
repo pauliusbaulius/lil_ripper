@@ -144,6 +144,6 @@ def index_subreddits(subreddits, default_database, min_upvotes=0):
 if __name__ == "__main__":
     # todo this can be parallelized 8-)
     # Test by parsing all nsfw subreddits.
-    nsfw_subs = tools.load_csv("/home/joe/github/lil_ripper/nsfw_subs.csv")
+    nsfw_subs = tools.load_csv("/home/joe/github/lil_ripper/all_nsfw_subs_scroller.csv")
     for sub in nsfw_subs:
         index_subreddit(sub, min_upvotes=5)
