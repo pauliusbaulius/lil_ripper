@@ -25,6 +25,7 @@ def rip_subreddit_no_index(subreddit_name, download_location, min_upvotes, forma
     time_from = int(time.time())
     try:
         # It just works - Todd Howard
+        download_location = create_directory(download_location, subreddit_name)
         while True and time_from > 1:
             json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit_name}" \
                         f"&sort=desc&sort_type=created_utc&before={time_from}&score=>{min_upvotes-1}&size=1000&is_self=false"
@@ -147,4 +148,4 @@ def json_try(json_url, directory, formats):
 if __name__ == "__main__":
     #handle_url("https://imgur.com/a/xzCD0wC", "/home/joe/github/lil_ripper/testing_grounds", ["jpg, png"])
     #download_file("https://imgur.com/HHDZK1t.jpg", "/home/joe/github/lil_ripper/testing_grounds/imgur_xzCD0wC", ["jpg"])
-    rip_subreddit_no_index("dankmemes", "C:\\Users\\workstation\\Desktop\\lil ripper github\\lil_ripper\\old_data\\test", 100, ["jpg", "png", "gif"])
+    rip_subreddit_no_index("dankmemes", "C:\\Users\\workstation\\Desktop\\lil ripper github\\lil_ripper\\downloads\\testing", 1000, ["jpg", "png", "gif", "webm"])

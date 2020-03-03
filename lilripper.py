@@ -4,7 +4,7 @@ from modules import tools, indexer, downloader
 
 default_database = tools.load_settings()["database"]
 default_download = tools.load_settings()["download_directory"]
-
+default_formats = tools.load_settings()["formats_to_rip"]
 
 def get_args(arguments=sys.argv[1:]):
     parser = argparse.ArgumentParser(description="lil ripper, your #1 choice for subreddit archiving!")
@@ -22,15 +22,22 @@ def get_args(arguments=sys.argv[1:]):
                         help="minimum amount of upvotes to index/download a post. default is 0.",
                         default=0)
     parser.add_argument("-o", "--output",
-                        help="path to download to. no input uses default download location. ",
+                        help="path to download to. no input uses default download location.",
                         default=default_download)
     parser.add_argument("-d", "--database",
-                        help="path to database. no input uses default database. ",
+                        help="path to database. no input uses default database.",
                         default=default_database)
+    parser.add_argument("-f", "--formats",
+                        help="formats to consider. no input uses default formats from settings.json",
+                        default=default_formats)
     # Handle continue/no-continue for downloads
-    feature_parser = parser.add_mutually_exclusive_group(required=False)
-    feature_parser.add_argument('--continue-download', dest='continue_download', action='store_true')
-    feature_parser.add_argument('--no-continue-download', dest='continue_download', action='store_false')
+    handle_continue = parser.add_mutually_exclusive_group(required=False)
+    handle_continue.add_argument('--continue-download', dest='continue_download', action='store_true')
+    handle_continue.add_argument('--no-continue-download', dest='continue_download', action='store_false')
+
+    handle_force_download = parser.add_mutually_exclusive_group(required=False)
+    handle_force_download.add_argument('--no-index', dest='no_index', action='store_true')
+
     parser.set_defaults(feature=True)
     # todo what does this do?
     parser.add_argument("-v", "--verbose", dest='verbose', action='store_true', help="Verbose mode.")
@@ -69,11 +76,17 @@ def handle_args(arguments):
                 subreddits = tools.load_csv(item)
                 for subreddit in subreddits:
                     # todo start indexing and then ripping
-                    downloader.rip_subreddit(subreddit_name=subreddit,
-                                             download_location=arguments.output,
-                                             database_location=arguments.database,
-                                             min_upvotes=arguments.min_upvotes,
-                                             continue_download=arguments.continue_download)
+                    if arguments.no_index:
+                        downloader.rip_subreddit_no_index(subreddit_name=subreddit,
+                                                          download_location=arguments.output,
+                                                          min_upvotes=arguments.min_upvotes,
+                                                          formats=arguments.formats)
+                    else:
+                        downloader.rip_subreddit(subreddit_name=subreddit,
+                                                 download_location=arguments.output,
+                                                 database_location=arguments.database,
+                                                 min_upvotes=arguments.min_upvotes,
+                                                 continue_download=arguments.continue_download)
             # todo handle different sqlite extensions!
             # If it is a db, pass to db_ripper.
             elif str(item).endswith(".db"):
@@ -81,13 +94,23 @@ def handle_args(arguments):
             # If it is subreddit or list of subs, pass them to ripper one by one.
             else:
                 # todo start indexing and then ripping
-                downloader.rip_subreddit(subreddit_name=arguments.rip[0],
-                                         download_location=arguments.output,
-                                         database_location=arguments.database,
-                                         min_upvotes=arguments.min_upvotes,
-                                         continue_download=arguments.continue_download)
+                if arguments.no_index:
+                    downloader.rip_subreddit_no_index(subreddit_name=arguments.rip[0],
+                                                      download_location=arguments.output,
+                                                      min_upvotes=arguments.min_upvotes,
+                                                      formats=arguments.formats)
+                else:
+                    downloader.rip_subreddit(subreddit_name=arguments.rip[0],
+                                             download_location=arguments.output,
+                                             database_location=arguments.database,
+                                             min_upvotes=arguments.min_upvotes,
+                                             continue_download=arguments.continue_download)
+
+
 
 
 if __name__ == "__main__":
     args = get_args()
     handle_args(args)
+
+# python lilripper.py -r dankmemes -u 10000 --no-index
