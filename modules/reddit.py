@@ -18,13 +18,14 @@ def download_reddit_webm(url):
 
     # Json url is just reddit post url with ".json" appended to the end.
     json_url = url + ".json"
+    # todo sleep if we get error 429 response!
     json_data = requests.get(json_url).json()
     print(json_data)
 
     for item in json_data:
         print(item)
 
-    webm_url = json_data["0"]["data"]["media"]["fallback_url"]
+    webm_url = json_data["0"]["data"]["media"]["reddit_video"]["fallback_url"]
     print(webm_url)
 
     # extract json fallback_url
