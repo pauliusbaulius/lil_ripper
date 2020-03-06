@@ -24,7 +24,7 @@ def ripper(subreddit_name, download_location, min_upvotes, formats):
         -4.1 If url has downloaded=true, skip it
         -4.2 After downloading, set matching url downloaded status to true (update_csv:path, url)
         -4.3 Downloader function checks for dupes first thing, to speed things up!
-        -4.4 Url handler works with reddit webm's
+        +4.4 Url handler works with reddit webm's
 
     :param subreddit_name:
     :param download_location:
@@ -37,36 +37,49 @@ def ripper(subreddit_name, download_location, min_upvotes, formats):
     BASE_DOWNLOAD_PATH = download_location
 
 
-def create_dir(path, new_dir):
-    """Given a base path and a new directory name, creates a directory."""
-    pass
+def create_dir(new_dir):
+    """
+    If directory does not exist, make one. Otherwise return already existing directory.
+    :param base_dir: base directory where to create new directory.
+    :param new_dir: name of the new directory.
+    :return: path to new/existing directory.
+    """
+    full_path = os.path.join(BASE_DOWNLOAD_PATH, new_dir)
+    if not os.path.exists(full_path):
+        os.mkdir(full_path)
+        print(f"New directory [{full_path}] was created.")
+        return full_path
+    else:
+        print(f"Directory [{full_path}] already exists.")
+        return full_path
 
 
-def create_csv(path, filename):
+def create_csv(filename):
     """Given a base path and a new filename, creates a .csv file."""
-    pass
+    global BASE_DOWNLOAD_PATH
 
 
-def sort_csv(path, filename):
+def sort_csv(filename):
     """Given path and .csv filename, sorts the file by utc_from field."""
-    pass
+    global BASE_DOWNLOAD_PATH
 
 
-def get_csv_newest_utc(path, filename):
+def get_csv_newest_utc(filename):
     """
     Given path and .csv filename, returns highest utc_from value.
     Assumes that the file is sorted by utc_from.
     # todo Maybe sort the file before looking to make sure? And reduce possible malfunctions.
     """
-    pass
+    global BASE_DOWNLOAD_PATH
 
 
-def get_csv_oldest_utc(path, filename):
+def get_csv_oldest_utc(filename):
     """
     Given path and .csv filename, returns lowest utc_to value.
     Assumes that the file is sorted by utc_from.
     # todo Maybe sort the file before looking to make sure? And reduce possible malfunctions.
     """
+    global BASE_DOWNLOAD_PATH
     pass
 
 
@@ -85,25 +98,34 @@ def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes, batch_size):
     pass
 
 
-def download_from_json(url):
+def download_from_json(json_url):
     """
     Given one json url, extracts media urls.
     Passes them to media url handler.
-    :param url:
+    :param json_url: Pushift json url.
     """
-    pass
+    try:
+        request = requests.get(json_url)
+        json_data = request.json()
+        link_data = json_data["data"]
+        for x in link_data:
+            handle_media_url(x["url"])
+        return True
+    except Exception as error:
+        print(f"Analyzing [{json_url}] has failed.")
+        # Gives user complete error traceback, because they love it.
+        print(error.with_traceback())
+        return False
 
 
-def handle_media_url(url, formats):
+def handle_media_url(url):
     """
-    Given one url and list of formats to download,
-    it checks if url is downloadable and passes downloadable urls to downloader.
+    Given one url, it checks if url is downloadable and passes downloadable urls to downloader.
+    Uses global variable to check formats.
     :param url: Direct url of a file to download, aka URI.
-    :param formats: List of formats specified by the user.
     """
-    global BASE_DOWNLOAD_PATH
     # If it is a directly downloadable link ending in valid format.
-    if is_downloadable(url, formats):
+    if is_downloadable(url, DOWNLOAD_FORMATS):
         # Make .gifv files into .mp4 files, to be playable on computers that do not support .gifv.
         if str(url).endswith(".gifv"):
             url = url.replace(".gifv", ".mp4")
@@ -118,11 +140,11 @@ def handle_media_url(url, formats):
     # If it is an imgur album...
     elif imgur.is_imgur_album(url):
         print(f"Downloading imgur album [{url}]")
-        imgur.download_imgur_album(url, BASE_DOWNLOAD_PATH, formats)
+        imgur.download_imgur_album(url, BASE_DOWNLOAD_PATH, DOWNLOAD_FORMATS)
     # If it is gfycat link...
     elif gfycat.is_gfycat_link(url):
         print(f"Downloading gfycat video [{url}]")
-        gfycat.download_gfycat_video(url, BASE_DOWNLOAD_PATH, formats)
+        gfycat.download_gfycat_video(url, BASE_DOWNLOAD_PATH, DOWNLOAD_FORMATS)
     else:
         print(f"Cannot download this url (yet): [{url}]")
 
