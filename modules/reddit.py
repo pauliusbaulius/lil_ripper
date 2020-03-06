@@ -30,6 +30,11 @@ def download_reddit_webm(url, download_path):
     """
     # todo handle exceptions better than just printing trace and returning false.
     try:
+        # If it is a v.redd.it link, get the post link!
+        if url.startswith("https://v.redd.it/"):
+            r = requests.get(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
+            url = r.url
         # Post id will be filename
         webm_filename = str(url).split("/")[-3]
         # Check if there is one downloaded already.
@@ -54,7 +59,7 @@ def download_reddit_webm(url, download_path):
         else:
             print(f"File [reddit_{webm_filename}.mp4] has been downloaded already, skipping...")
     except Exception as error:
-        print(error.with_traceback())
+        print("Could not download this webm! ERROR:", error)
         return False
 
 
@@ -82,7 +87,7 @@ def join_video_audio(filename_video, filename_audio, path):
         print(f"Successfully merged audio and video into one file [reddit_{filename_video}]")
         return True
     except Exception as error:
-        print(error.with_traceback())
+        print(f"Could not merge into one video, ERROR:", error)
         return False
 
 

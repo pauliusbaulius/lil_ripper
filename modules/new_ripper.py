@@ -1,17 +1,19 @@
 import concurrent.futures
 import os
+import random
 from datetime import time
 import time
 import requests
 from modules import imgur, gfycat, reddit
 
 # If no path is specified in CLI, uses current directory as base path.
+# todo do not forget to set to os.getcwd() when merging to master!!!!
 BASE_DOWNLOAD_PATH = "/home/joe/github/lil_ripper/testing_grounds/parallel_test/"
 # If no formats are specified, uses basic predefined formats.
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
 
-def ripper(subreddit_name, download_location, min_upvotes, formats):
+def ripper(subreddit_name, download_location=BASE_DOWNLOAD_PATH, min_upvotes=10, formats=DOWNLOAD_FORMATS):
     """
     -1. Create download directory. (create_dir:download_path, subreddit_name)
     -2. Create <subreddit_name>.csv in download directory. (create_csv:directory, name)
@@ -33,10 +35,21 @@ def ripper(subreddit_name, download_location, min_upvotes, formats):
     :param formats:
     :return:
     """
+    # todo add timer!
     # Set global variable to not have to pass download_path to other functions!
     global BASE_DOWNLOAD_PATH
-    BASE_DOWNLOAD_PATH = download_location
-    download_from_json()
+    global DOWNLOAD_FORMATS
+    # Create dir for downloads
+    BASE_DOWNLOAD_PATH = os.path.join(download_location, subreddit_name)
+    create_dir(BASE_DOWNLOAD_PATH)
+    # Set download formats
+    DOWNLOAD_FORMATS = formats
+    # Generate json urls for subreddit.
+    json_urls = generate_pushift_urls(subreddit_name, int(time.time()), 1, min_upvotes, batch_size=1000)
+    # Download files from each json
+    print(json_urls)
+    for url in json_urls:
+        download_from_json(url)
 
 
 def create_dir(new_dir):
@@ -85,7 +98,7 @@ def get_csv_oldest_utc(filename):
     pass
 
 
-def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes, batch_size):
+def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes, batch_size=1000):
     """
     Given a subreddit, utc times, minimum upvote count and batch size,
     generates appropriate pushift json urls and stores them in a list.
@@ -97,7 +110,21 @@ def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes, batch_size):
     :param batch_size:
     :return:
     """
-    pass
+    json_links = []
+    try:
+        while True and utc_from > utc_to:
+            json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit}" \
+                        f"&sort=desc&sort_type=created_utc&before={utc_from}&score=>{min_upvotes - 1}&size={batch_size}&is_self=false"
+            json_links.append(json_link)
+            json_data = requests.get(json_link).json()
+            utc_from = json_data["data"][-1].get("created_utc")
+            # Sleep for 1 second to only make one api call per second.
+            time.sleep(1)
+    except IndexError:
+        # When all json files are generated, break loop and finish.
+        print(f"{len(json_links)} json links were generated. Will start downloading...")
+    finally:
+        return json_links
 
 
 def download_from_json(json_url):
@@ -139,9 +166,7 @@ def handle_media_url(url):
             download_file(url=url, path=BASE_DOWNLOAD_PATH)
     # If it is a reddit webm
     elif reddit.is_reddit_webm(url):
-        # todo remove print() when function is implemented and working!
-        print(f"It is a reddit webm! [{url}]")
-        reddit.download_reddit_webm(url, BASE_DOWNLOAD_PATH)
+        reddit.download_reddit_webm(url=url, download_path=BASE_DOWNLOAD_PATH)
     # If it is an imgur album...
     elif imgur.is_imgur_album(url):
         print(f"Downloading imgur album [{url}]")
@@ -149,9 +174,10 @@ def handle_media_url(url):
     # If it is gfycat link...
     elif gfycat.is_gfycat_link(url):
         print(f"Downloading gfycat video [{url}]")
-        gfycat.download_gfycat_video(url, BASE_DOWNLOAD_PATH, DOWNLOAD_FORMATS)
+        gfycat.download_gfycat_video(url=url, directory=BASE_DOWNLOAD_PATH)
     else:
         print(f"Cannot download this url (yet): [{url}]")
+    # todo handle imgur [https://imgur.com/mJ9Dp9v] links!
 
 
 def is_downloadable(url, formats):
@@ -176,13 +202,12 @@ def download_file(path, url):
         # Filename is url ending.
         filename = str(url).split("/")[-1]
         # Check if already exists, if not, download file.
-        if not check_if_downloaded(path, filename):
+        if not check_if_downloaded(BASE_DOWNLOAD_PATH, filename):
             # Do not be greedy.
-            time.sleep(5)
-            # Wait for 10 seconds between gfycat requests to not get ip ban.
-            # todo play around with the value, maybe 5 seconds are enough...
+            time.sleep(random.randint(1, 10))
+            # Wait for 5-15 seconds between gfycat requests to not get ip ban.
             if gfycat.is_gfycat_link(url):
-                time.sleep(10)
+                time.sleep(random.randint(5, 15))
             request = requests.get(url)
             # Save file content to variable.
             file_content = request.content
@@ -190,7 +215,7 @@ def download_file(path, url):
             # Do not download files under 10KB to not download imgur deleted images and other most likely non-trivial stuff.
             if len(file_content) > 10240:
                 # Save file to disk.
-                with open(os.path.join(path, filename), "wb") as f:
+                with open(os.path.join(BASE_DOWNLOAD_PATH, filename), "wb") as f:
                     f.write(file_content)
                     # Calculate size in human-readable format for displaying purposes.
                     size = sizeof_fmt(os.fstat(f.fileno()).st_size)
@@ -237,6 +262,4 @@ def sizeof_fmt(num, suffix='B'):
 if __name__ == "__main__":
     print("Will run tests.")
     # todo run tests
-    json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit=lithuania" \
-                f"&sort=desc&sort_type=created_utc&before={int(time.time())}&score=>10&size=1000&is_self=false"
-    download_from_json(json_link)
+    ripper(subreddit_name="lithuania", min_upvotes=50)
