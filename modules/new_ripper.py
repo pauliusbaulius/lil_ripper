@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 from datetime import time
 import time
@@ -5,7 +6,7 @@ import requests
 from modules import imgur, gfycat, reddit
 
 # If no path is specified in CLI, uses current directory as base path.
-BASE_DOWNLOAD_PATH = os.getcwd()
+BASE_DOWNLOAD_PATH = "/home/joe/github/lil_ripper/testing_grounds/parallel_test/"
 # If no formats are specified, uses basic predefined formats.
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
@@ -35,6 +36,7 @@ def ripper(subreddit_name, download_location, min_upvotes, formats):
     # Set global variable to not have to pass download_path to other functions!
     global BASE_DOWNLOAD_PATH
     BASE_DOWNLOAD_PATH = download_location
+    download_from_json()
 
 
 def create_dir(new_dir):
@@ -104,13 +106,16 @@ def download_from_json(json_url):
     Passes them to media url handler.
     :param json_url: Pushift json url.
     """
+    urls = []
     try:
         request = requests.get(json_url)
         json_data = request.json()
         link_data = json_data["data"]
         for x in link_data:
-            handle_media_url(x["url"])
-        return True
+            urls.append(x["url"])
+        # Start parallel downloader here.
+        with concurrent.futures.ProcessPoolExecutor() as parallel:
+            [parallel.submit(handle_media_url, url) for url in urls]
     except Exception as error:
         print(f"Analyzing [{json_url}] has failed.")
         # Gives user complete error traceback, because they love it.
@@ -129,9 +134,9 @@ def handle_media_url(url):
         # Make .gifv files into .mp4 files, to be playable on computers that do not support .gifv.
         if str(url).endswith(".gifv"):
             url = url.replace(".gifv", ".mp4")
-            download_file(url, BASE_DOWNLOAD_PATH)
+            download_file(url=url, path=BASE_DOWNLOAD_PATH)
         else:
-            download_file(url, BASE_DOWNLOAD_PATH)
+            download_file(url=url, path=BASE_DOWNLOAD_PATH)
     # If it is a reddit webm
     elif reddit.is_reddit_webm(url):
         # todo remove print() when function is implemented and working!
@@ -172,6 +177,8 @@ def download_file(path, url):
         filename = str(url).split("/")[-1]
         # Check if already exists, if not, download file.
         if not check_if_downloaded(path, filename):
+            # Do not be greedy.
+            time.sleep(5)
             # Wait for 10 seconds between gfycat requests to not get ip ban.
             # todo play around with the value, maybe 5 seconds are enough...
             if gfycat.is_gfycat_link(url):
@@ -230,3 +237,6 @@ def sizeof_fmt(num, suffix='B'):
 if __name__ == "__main__":
     print("Will run tests.")
     # todo run tests
+    json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit=lithuania" \
+                f"&sort=desc&sort_type=created_utc&before={int(time.time())}&score=>10&size=1000&is_self=false"
+    download_from_json(json_link)
