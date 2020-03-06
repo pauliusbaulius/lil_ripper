@@ -1,5 +1,5 @@
 {
   "database": "databases/ripper.db",
   "formats_to_rip": ["jpg", "jpeg", "png", "gif", "webm", "mp4"],
-  "download_directory": "downloads"
+  "download_directory": "X:\\downloads\\"
 }

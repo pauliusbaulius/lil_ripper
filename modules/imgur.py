@@ -33,8 +33,8 @@ def download_imgur_album(url, directory, formats):
             # Create new dir with album id as name
             album_directory = downloader.create_directory(directory, album_name)
             for file_url in album_image_urls:
-                downloader.download_file(file_url, album_directory, formats)
-                #tools.download_file(file_url, album_directory)
+                if downloader.is_downloadable(file_url, formats):
+                    downloader.download_file(file_url, album_directory)
     except TypeError:
         print("Imgur album has been does not exist anymore, skipping...")
 
