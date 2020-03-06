@@ -114,7 +114,7 @@ def handle_media_url(url, formats):
     elif reddit.is_reddit_webm(url):
         # todo remove print() when function is implemented and working!
         print(f"It is a reddit webm! [{url}]")
-        # download_reddit_webm(url)
+        reddit.download_reddit_webm(url, BASE_DOWNLOAD_PATH)
     # If it is an imgur album...
     elif imgur.is_imgur_album(url):
         print(f"Downloading imgur album [{url}]")
@@ -131,7 +131,6 @@ def is_downloadable(url, formats):
     """Given one url and a list of formats, check whether the link leads to file we want to download."""
     # If it is a .gifv and .mp4 is to be downloaded, use that extra ugly check.
     return str(url).endswith(tuple(formats)) or str(url).endswith("gifv") and "mp4" in tuple(formats)
-
 
 
 def download_file(path, url):
