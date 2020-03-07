@@ -1,0 +1,13 @@
+# TODO
+- compress images to reduce storage usage if user picks --compress
+  - show compression gains
++ rip from csv list with subreddits
+- show total network usage
++ new and improved pushshift iterator
+- call lil ripper using args in terminal
+
+# Optimization of dupe checking.
+- extract download links from all jsons in one list
+    - remove duplicates
+    - check if already downloaded
+    - start multiple processes and work on list of remaining, yet not downloaded urls

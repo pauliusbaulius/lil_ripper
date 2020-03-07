@@ -45,6 +45,7 @@ def ripper(subreddit_name, download_location=BASE_DOWNLOAD_PATH, min_upvotes=10,
     # Set download formats
     DOWNLOAD_FORMATS = formats
     # Generate json urls for subreddit.
+    print("Generating download links, might take a while...")
     json_urls = generate_pushift_urls(subreddit_name, int(time.time()), 1, min_upvotes, batch_size=1000)
     # Download files from each json
     for url in json_urls:
@@ -60,6 +61,8 @@ def create_dir(base_path, new_dir):
     :param new_dir: name of the new directory.
     :return: path to new/existing directory.
     """
+    #todo https://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
+    # todo Create dirs for given path if they do not exist yet.
     full_path = os.path.join(base_path, new_dir)
     if not os.path.exists(full_path):
         os.mkdir(full_path)
