@@ -38,7 +38,6 @@ def load_settings():
 
 
 if __name__ == "__main__":
-    s = load_settings()
-    print(s)
+    print("Will run tests.")
 
 

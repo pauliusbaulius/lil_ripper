@@ -2,7 +2,7 @@
 
 A multiprocess-python program for subreddit archiving purposes. It will try to extract all media links from subreddit posts and download them. It uses [pushshift](https://pushshift.io/) to generate json links containing Reddit post data. **Generating links will take a while, to not spam pushshift with API calls.** Be patient.
 
-
+Requires ffmpeg to merge webm audio and video files!
 
 ## Features
 
@@ -12,7 +12,7 @@ A multiprocess-python program for subreddit archiving purposes. It will try to e
 
 :alien: Downloading introduces a delay between 1 and 5 seconds for normal links and additional delay for gfycat links, to not get your ip blacklisted. *Happens almost instantly if you are not using good headers and spamming them with requests. Be gentle.*
 
-:sunglasses: Only tested on GNU/Linux systems.
+:sunglasses: Tested on GNU/Linux systems.
 
 
 

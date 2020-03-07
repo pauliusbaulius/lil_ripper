@@ -16,15 +16,16 @@ def is_imgur_album(url):
     Checks whether a link is imgur album or not.
     """
     url = str(url)
-    if url.find("imgur.com/a/") >= 0:
+    if url.find("imgur.com/a/") >= 0 or url.find("imgur.com/gallery/") >= 0:
         return True
     else:
         return False
 
 
 def is_imgur_single_image(url):
-    # todo [https://imgur.com/RLCNQFq] should be handled with regex? if not imgur.com/a/ and doesnt contain . at the -3 -4, append .jpg
-    regex_pattern = re.compile("https://imgur.com/[^a/](.+)[^.jpg|.png|.gifv|.mp4]")
+    # Match http and https links from imgur that do not end in URI or are albums.
+    # todo [http://m.imgur.com/lqpe4i2] handle
+    regex_pattern = re.compile("https?://imgur.com/[^a/](.+)[^.jpg|.png|.gifv|.mp4]")
     url = str(url)
     try:
         if str(re.match(regex_pattern, url).string):
@@ -130,7 +131,3 @@ def download_imgur_albums(url):
 
 if __name__ == "__main__":
     print("Will run tests.")
-    #create_album_dir("/home/joe/github/lil_ripper/testing_grounds", "bruhtonium")
-    #download_imgur_album("https://imgur.com/a/xzCD0wC", "/home/joe/github/lil_ripper/testing_grounds", ["jpg"])
-    #print(is_imgur_single_image("https://imgur.com/RLCNQFq"))
-    #print(is_imgur_single_image("https://i.imgur.com/cRgEyJX.jpg"))

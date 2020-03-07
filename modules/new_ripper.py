@@ -137,14 +137,10 @@ def download_from_json(json_url):
     Passes them to media url handler.
     :param json_url: Pushift json url.
     """
-    urls = []
     try:
-        request = requests.get(json_url)
-        json_data = request.json()
-        link_data = json_data["data"]
-        for x in link_data:
-            urls.append(x["url"])
+        urls = generate_urls_from_json(json_url)
         # todo check for dupes in dir, eliminate dupes from urls to download, should speed it up!
+        urls = check_dupes(urls)
         # Start parallel downloader here.
         with concurrent.futures.ProcessPoolExecutor() as parallel:
             [parallel.submit(handle_media_url, url) for url in urls]
@@ -152,6 +148,83 @@ def download_from_json(json_url):
         print(f"Analyzing [{json_url}] has failed.")
         # Gives user complete error traceback, because they love it.
         print(error.with_traceback())
+        return False
+
+
+def generate_urls_from_json(json_url):
+    """Given a pushshift json url, extracts urls from reddit posts."""
+    urls = []
+    request = requests.get(json_url)
+    json_data = request.json()
+    link_data = json_data["data"]
+    for x in link_data:
+        urls.append(x["url"])
+    return urls
+
+
+def check_dupes(urls):
+    """
+    Given a list of urls, checks for duplicates and then checks
+    for already downloaded files using url ending as filename.
+    """
+    amount_start = len(urls)
+    print(f"{len(urls)} have been given.")
+    # todo when it works, remove dupe checking from downloader!
+    # First, remove duplicate links from list.
+    urls = list(dict.fromkeys(urls))
+    # Second, remove links of already downloaded files.
+    # todo multiprocessing here too?
+    # for url in urls:
+    #     status = check_if_downloaded(BASE_DOWNLOAD_PATH, filename=str(url).split("/")[-1])
+    #     if status:
+    #         urls.remove(url)
+    print(f"Removed {amount_start - len(urls)} duplicates and already downloaded links, {len(urls)} are left to download.")
+    return urls
+
+
+# todo alternative version without dupe checking, assumes that dupes are checked before, worst case - stuff will be overwritten
+def download_file_new(url, path):
+    """
+    Given a download path and file url, tries to download it.
+    - Checks if file already exists before trying to download, skips if item exists.
+    - Names files by their url endings.
+    - Does not download files under 10KB to prevent downloading of deleted imgur image placeholders
+    and other unwanted data!
+    Returns status as boolean, True if file was downloaded, False if it wasn't.
+    :param path: Download location.
+    :param url: Link to resource to download.
+    :return: True if file has been downloaded, False if file failed to download.
+    """
+    try:
+        # Filename is url ending.
+        filename = str(url).split("/")[-1]
+        # Do not be greedy.
+        time.sleep(random.randint(1, 5))
+        # Wait for 5-15 seconds between gfycat requests to not get ip ban.
+        if gfycat.is_gfycat_link(url):
+            time.sleep(random.randint(15, 30))
+        # todo select random header from list of headers
+        request = requests.get(url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
+        # Save file content to variable.
+        file_content = request.content
+        # todo check whether this impacts some subreddits that could host images smaller than 10KB.
+        # Do not download files under 10KB to not download imgur deleted images and other most likely non-trivial stuff.
+        if len(file_content) > 10240:
+            # Save file to disk.
+            with open(os.path.join(path, filename), "wb") as f:
+                f.write(file_content)
+                # Calculate size in human-readable format for displaying purposes.
+                size = sizeof_fmt(os.fstat(f.fileno()).st_size)
+                print(f"Downloaded [{url}] [{size}]")
+                return True
+        else:
+            print(f"File [{url}] is under 10KB in size, skipping download...")
+            return False
+    except Exception as error:
+        # todo fix this band-aid exception, it works but it doesn't really tell why the problem happened.
+        print(f"Downloading [{url}] has failed, skipping...")
+        print(error)
         return False
 
 
@@ -273,5 +346,5 @@ def sizeof_fmt(num, suffix='B'):
 if __name__ == "__main__":
     print("Will run tests.")
     # todo run tests
-    ripper(subreddit_name="dankmemes", min_upvotes=2500)
+    #ripper(subreddit_name="dankmemes", min_upvotes=50000)
 
