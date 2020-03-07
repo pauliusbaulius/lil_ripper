@@ -1,9 +1,18 @@
 # lil ripper
 
-A multiprocess-python program for subreddit archiving purposes. Lil ripper will try to extract all media links from subreddit posts and download them. Duplicate files will be ignored. Lil ripper uses [pushshift](https://pushshift.io/) to generate .json links containing media links. Downloading is then distributed between multiple processes. Downloading also introduces a delay between 1 and 5 seconds for normal links and additional delay for gfycat links, to not get your ip blacklisted from the site. *Happens almost instantly if you are not using good headers and spamming them with requests. Be gentle.*
-Generating json files from pushshift will take some time, because lil ripper sleeps between requests to make 1 request per second.
+A multiprocess-python program for subreddit archiving purposes. It will try to extract all media links from subreddit posts and download them. It uses [pushshift](https://pushshift.io/) to generate `json` links containing Reddit post data. **Generating links will take a while, to not spam pushshift with API calls.** Be patient.
 
-:sunglasses: Works on GNU/Linux systems only, I assume, since I haven't tested it on other operating systems that I don't have. :sunglasses:
+
+
+## Features
+
+:clown_face:Does not download already downloaded files if same directory is given.
+
+:ghost:Downloading is distributed between multiple processes. 
+
+:alien: Downloading introduces a delay between 1 and 5 seconds for normal links and additional delay for `gfycat` links, to not get your `ip` blacklisted. *Happens almost instantly if you are not using good headers and spamming them with requests. Be gentle.*
+
+:sunglasses: Only tested on GNU/Linux systems.
 
 
 
@@ -16,12 +25,12 @@ Generating json files from pushshift will take some time, because lil ripper sle
 - [x] imgur album with one item aka no /a/ in link
 - [x] gfycat
 
+
+
 ## Usage
 
-Works with Linux CLI. 
-
 ```
-lilripper.py
+python lilripper.py
 -r, --rip <subreddit(s), csv(s)>
 	items you wish to use for indexing/ripping
 	
@@ -35,6 +44,8 @@ lilripper.py
 -f, --formats <space separated extensions> 
 	formats to download
 ```
+
+
 
 ## Examples
 
