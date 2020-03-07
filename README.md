@@ -1,8 +1,11 @@
 # lil ripper
 
-A python program to index and download entire subreddits. *It is not a complete archival tool, since some media hosted on 3rd party weird sites will not be downloaded if it is not a direct link.*
-Uses [pushshift](https://pushshift.io/) to generate json files containing media urls, and downloads them using all of your cores. There is a random delay between downloads to not abuse providers.
+A multiprocess-python program for subreddit archiving purposes. Lil ripper will try to extract all media links from subreddit posts and download them. Duplicate files will be ignored. Lil ripper uses [pushshift](https://pushshift.io/) to generate .json links containing media links. Downloading is then distributed between multiple processes. Downloading also introduces a delay between 1 and 5 seconds for normal links and additional delay for gfycat links, to not get your ip blacklisted from the site. *Happens almost instantly if you are not using good headers and spamming them with requests. Be gentle.*
 Generating json files from pushshift will take some time, because lil ripper sleeps between requests to make 1 request per second.
+
+:sunglasses: Works on GNU/Linux systems only, I assume, since I haven't tested it on other operating systems that I don't have. :sunglasses:
+
+
 
 
 ## Supported download links
