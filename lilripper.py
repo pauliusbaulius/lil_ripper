@@ -2,11 +2,7 @@ import argparse
 import os
 import sys
 from modules import tools, new_ripper
-from testing_grounds import indexer, downloader
 
-# default_database = tools.load_settings()["database"]
-# default_download = tools.load_settings()["download_directory"]
-# default_formats = tools.load_settings()["formats_to_rip"]
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
 
@@ -33,12 +29,6 @@ def get_args(arguments=sys.argv[1:]):
 
 
 def handle_args(arguments):
-    print(arguments)
-    print(arguments.rip)
-    print(arguments.min_upvotes)
-    print(arguments.download_path)
-    print(arguments.formats)
-
     print(f"Starting ripping: {', '.join(arguments.rip)}")
     for item in arguments.rip:
         # If it is a csv file, extract subreddits and pass to ripper one by one.
@@ -59,5 +49,4 @@ def handle_args(arguments):
 if __name__ == "__main__":
     args = get_args()
     handle_args(args)
-    #python3 lilripper.py -r cars -u 100 -d /run/media/joe/ProjectX/linux_downloads/uhh
 

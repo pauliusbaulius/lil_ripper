@@ -5,6 +5,7 @@
 - show total network usage
 + new and improved pushshift iterator
 - call lil ripper using args in terminal
+- pytests, because i have like 10% test coverage rn, if not less.
 
 # Optimization of dupe checking.
 - extract download links from all jsons in one list
