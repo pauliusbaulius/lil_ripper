@@ -1,6 +1,6 @@
 # lil ripper
 
-A multiprocess-python program for subreddit archiving purposes. It will try to extract all media links from subreddit posts and download them. It uses [pushshift](https://pushshift.io/) to generate `json` links containing Reddit post data. **Generating links will take a while, to not spam pushshift with API calls.** Be patient.
+A multiprocess-python program for subreddit archiving purposes. It will try to extract all media links from subreddit posts and download them. It uses [pushshift](https://pushshift.io/) to generate json links containing Reddit post data. **Generating links will take a while, to not spam pushshift with API calls.** Be patient.
 
 
 
@@ -10,7 +10,7 @@ A multiprocess-python program for subreddit archiving purposes. It will try to e
 
 :ghost:Downloading is distributed between multiple processes. 
 
-:alien: Downloading introduces a delay between 1 and 5 seconds for normal links and additional delay for `gfycat` links, to not get your `ip` blacklisted. *Happens almost instantly if you are not using good headers and spamming them with requests. Be gentle.*
+:alien: Downloading introduces a delay between 1 and 5 seconds for normal links and additional delay for gfycat links, to not get your ip blacklisted. *Happens almost instantly if you are not using good headers and spamming them with requests. Be gentle.*
 
 :sunglasses: Only tested on GNU/Linux systems.
 
