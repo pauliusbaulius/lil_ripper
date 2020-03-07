@@ -94,5 +94,5 @@ def join_video_audio(filename_video, filename_audio, path):
 if __name__ == "__main__":
     print("Will run tests.")
     # todo run pytests
-    download_reddit_webm("https://www.reddit.com/r/Idiotswithguns/comments/fdxn2q/soarcarl_gets_banned_on_twitch/", "/home/joe/github/lil_ripper/testing_grounds")
-    download_reddit_webm(download_path="/home/joe/github/lil_ripper/testing_grounds", url="https://www.reddit.com/r/Idiotswithguns/comments/fdyj21/interesting_way_to_propose/")
+    #download_reddit_webm("https://www.reddit.com/r/Idiotswithguns/comments/fdxn2q/soarcarl_gets_banned_on_twitch/", "/home/joe/github/lil_ripper/testing_grounds")
+    #download_reddit_webm(download_path="/home/joe/github/lil_ripper/testing_grounds", url="https://www.reddit.com/r/Idiotswithguns/comments/fdyj21/interesting_way_to_propose/")

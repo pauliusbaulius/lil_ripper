@@ -1,5 +1,6 @@
+import re
 import requests
-from modules import downloader
+from modules import new_ripper
 
 """
 Since imgur wants you to create user account to access read-only api which also required to give your email and phone number,
@@ -10,6 +11,7 @@ It is enough to download one json file and extract+reconstruct links to all albu
 
 
 def is_imgur_album(url):
+    # todo https://imgur.com/gallery/jViWuze is also valid name!
     """
     Checks whether a link is imgur album or not.
     """
@@ -20,7 +22,23 @@ def is_imgur_album(url):
         return False
 
 
-def download_imgur_album(url, directory, formats):
+def is_imgur_single_image(url):
+    # todo [https://imgur.com/RLCNQFq] should be handled with regex? if not imgur.com/a/ and doesnt contain . at the -3 -4, append .jpg
+    regex_pattern = re.compile("https://imgur.com/[^a/](.+)[^.jpg|.png|.gifv|.mp4]")
+    url = str(url)
+    try:
+        if str(re.match(regex_pattern, url).string):
+            return True
+    except AttributeError:
+        return False
+
+
+def make_imgur_image(url):
+    # Make link into jpg image and hope it is an image.
+    return url + ".jpg"
+
+
+def download_imgur_album(url, formats, path):
     """
     Downloads all media from imgur album and stores images in a new folder named imgur_<album_id> in given base dir.
     :param url: imgur album url
@@ -31,10 +49,10 @@ def download_imgur_album(url, directory, formats):
         album_image_urls = find_all_album_media(url)
         if album_image_urls is not None:
             # Create new dir with album id as name
-            album_directory = downloader.create_directory(directory, album_name)
+            album_directory = new_ripper.create_dir(base_path=path, new_dir=album_name)
             for file_url in album_image_urls:
-                if downloader.is_downloadable(file_url, formats):
-                    downloader.download_file(file_url, album_directory)
+                if new_ripper.is_downloadable(url=file_url, formats=formats):
+                    new_ripper.download_file(url=file_url, path=album_directory)
     except TypeError:
         print("Imgur album has been does not exist anymore, skipping...")
 
@@ -111,5 +129,8 @@ def download_imgur_albums(url):
 
 
 if __name__ == "__main__":
+    print("Will run tests.")
     #create_album_dir("/home/joe/github/lil_ripper/testing_grounds", "bruhtonium")
-    download_imgur_album("https://imgur.com/a/xzCD0wC", "/home/joe/github/lil_ripper/testing_grounds", ["jpg"])
+    #download_imgur_album("https://imgur.com/a/xzCD0wC", "/home/joe/github/lil_ripper/testing_grounds", ["jpg"])
+    #print(is_imgur_single_image("https://imgur.com/RLCNQFq"))
+    #print(is_imgur_single_image("https://i.imgur.com/cRgEyJX.jpg"))

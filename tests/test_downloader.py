@@ -1,4 +1,4 @@
-from modules import downloader
+from testing_grounds import downloader
 
 
 def test_is_reddit_webm():

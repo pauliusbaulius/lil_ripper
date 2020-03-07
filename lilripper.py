@@ -1,11 +1,13 @@
 import argparse
 import sys
-from modules import tools, indexer, downloader
+from modules import tools
+from testing_grounds import indexer, downloader
 
 default_database = tools.load_settings()["database"]
 default_download = tools.load_settings()["download_directory"]
 default_formats = tools.load_settings()["formats_to_rip"]
 
+# todo complete rework needed, indexer is gone
 def get_args(arguments=sys.argv[1:]):
     parser = argparse.ArgumentParser(description="lil ripper, your #1 choice for subreddit archiving!")
     # Only allow to either index or rip, not both at once!

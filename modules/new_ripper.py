@@ -1,14 +1,14 @@
 import concurrent.futures
 import os
 import random
-from datetime import time
+from datetime import time, timedelta
 import time
 import requests
 from modules import imgur, gfycat, reddit
 
 # If no path is specified in CLI, uses current directory as base path.
 # todo do not forget to set to os.getcwd() when merging to master!!!!
-BASE_DOWNLOAD_PATH = "/home/joe/github/lil_ripper/testing_grounds/parallel_test/"
+BASE_DOWNLOAD_PATH = "/run/media/joe/ProjectX/linux_downloads"
 # If no formats are specified, uses basic predefined formats.
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
@@ -35,31 +35,32 @@ def ripper(subreddit_name, download_location=BASE_DOWNLOAD_PATH, min_upvotes=10,
     :param formats:
     :return:
     """
-    # todo add timer!
+    start_time = time.time()
     # Set global variable to not have to pass download_path to other functions!
     global BASE_DOWNLOAD_PATH
     global DOWNLOAD_FORMATS
     # Create dir for downloads
-    BASE_DOWNLOAD_PATH = os.path.join(download_location, subreddit_name)
-    create_dir(BASE_DOWNLOAD_PATH)
+    save_location = create_dir(download_location, subreddit_name)
+    BASE_DOWNLOAD_PATH = save_location
     # Set download formats
     DOWNLOAD_FORMATS = formats
     # Generate json urls for subreddit.
     json_urls = generate_pushift_urls(subreddit_name, int(time.time()), 1, min_upvotes, batch_size=1000)
     # Download files from each json
-    print(json_urls)
     for url in json_urls:
         download_from_json(url)
+    elapsed_time = time.time() - start_time
+    print(f"Downloading finished, took {timedelta(seconds=round(elapsed_time))}.")
 
 
-def create_dir(new_dir):
+def create_dir(base_path, new_dir):
     """
     If directory does not exist, make one. Otherwise return already existing directory.
     :param base_dir: base directory where to create new directory.
     :param new_dir: name of the new directory.
     :return: path to new/existing directory.
     """
-    full_path = os.path.join(BASE_DOWNLOAD_PATH, new_dir)
+    full_path = os.path.join(base_path, new_dir)
     if not os.path.exists(full_path):
         os.mkdir(full_path)
         print(f"New directory [{full_path}] was created.")
@@ -140,6 +141,7 @@ def download_from_json(json_url):
         link_data = json_data["data"]
         for x in link_data:
             urls.append(x["url"])
+        # todo check for dupes in dir, eliminate dupes from urls to download, should speed it up!
         # Start parallel downloader here.
         with concurrent.futures.ProcessPoolExecutor() as parallel:
             [parallel.submit(handle_media_url, url) for url in urls]
@@ -161,23 +163,27 @@ def handle_media_url(url):
         # Make .gifv files into .mp4 files, to be playable on computers that do not support .gifv.
         if str(url).endswith(".gifv"):
             url = url.replace(".gifv", ".mp4")
-            download_file(url=url, path=BASE_DOWNLOAD_PATH)
+            download_file(url, BASE_DOWNLOAD_PATH)
         else:
-            download_file(url=url, path=BASE_DOWNLOAD_PATH)
+            download_file(url, BASE_DOWNLOAD_PATH)
     # If it is a reddit webm
     elif reddit.is_reddit_webm(url):
         reddit.download_reddit_webm(url=url, download_path=BASE_DOWNLOAD_PATH)
     # If it is an imgur album...
     elif imgur.is_imgur_album(url):
         print(f"Downloading imgur album [{url}]")
-        imgur.download_imgur_album(url, BASE_DOWNLOAD_PATH, DOWNLOAD_FORMATS)
+        # Need to pass dir to make imgur folder in subreddit folder.
+        imgur.download_imgur_album(url=url, formats=DOWNLOAD_FORMATS, path=BASE_DOWNLOAD_PATH)
     # If it is gfycat link...
     elif gfycat.is_gfycat_link(url):
         print(f"Downloading gfycat video [{url}]")
-        gfycat.download_gfycat_video(url=url, directory=BASE_DOWNLOAD_PATH)
+        gfycat.handle_gfycat_url(url, BASE_DOWNLOAD_PATH)
+    # Tries to convert those imgur links with no file ending to .jpg and hope for the best.
+    elif imgur.is_imgur_single_image(url):
+        url = imgur.make_imgur_image(url)
+        download_file(url)
     else:
         print(f"Cannot download this url (yet): [{url}]")
-    # todo handle imgur [https://imgur.com/mJ9Dp9v] links!
 
 
 def is_downloadable(url, formats):
@@ -186,7 +192,7 @@ def is_downloadable(url, formats):
     return str(url).endswith(tuple(formats)) or str(url).endswith("gifv") and "mp4" in tuple(formats)
 
 
-def download_file(path, url):
+def download_file(url, path):
     """
     Given a download path and file url, tries to download it.
     - Checks if file already exists before trying to download, skips if item exists.
@@ -202,20 +208,22 @@ def download_file(path, url):
         # Filename is url ending.
         filename = str(url).split("/")[-1]
         # Check if already exists, if not, download file.
-        if not check_if_downloaded(BASE_DOWNLOAD_PATH, filename):
+        if not check_if_downloaded(path, filename):
             # Do not be greedy.
-            time.sleep(random.randint(1, 10))
+            time.sleep(random.randint(1, 5))
             # Wait for 5-15 seconds between gfycat requests to not get ip ban.
             if gfycat.is_gfycat_link(url):
-                time.sleep(random.randint(5, 15))
-            request = requests.get(url)
+                time.sleep(random.randint(15, 30))
+            # todo select random header from list of headers
+            request = requests.get(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
             # Save file content to variable.
             file_content = request.content
             # todo check whether this impacts some subreddits that could host images smaller than 10KB.
             # Do not download files under 10KB to not download imgur deleted images and other most likely non-trivial stuff.
             if len(file_content) > 10240:
                 # Save file to disk.
-                with open(os.path.join(BASE_DOWNLOAD_PATH, filename), "wb") as f:
+                with open(os.path.join(path, filename), "wb") as f:
                     f.write(file_content)
                     # Calculate size in human-readable format for displaying purposes.
                     size = sizeof_fmt(os.fstat(f.fileno()).st_size)
@@ -262,4 +270,4 @@ def sizeof_fmt(num, suffix='B'):
 if __name__ == "__main__":
     print("Will run tests.")
     # todo run tests
-    ripper(subreddit_name="lithuania", min_upvotes=50)
+    ripper(subreddit_name="dankmemes", min_upvotes=2500)
