@@ -271,3 +271,4 @@ if __name__ == "__main__":
     print("Will run tests.")
     # todo run tests
     ripper(subreddit_name="dankmemes", min_upvotes=2500)
+
