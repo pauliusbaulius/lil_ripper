@@ -25,7 +25,7 @@ Also, do not count on gfycat ripping, they use cloudflare and all the other :clo
 - [x] imgur direct link
 - [x] imgur album
 - [x] imgur album with one item aka no /a/ in link
-- [x] gfycat :clown_face: gfycat will still not work in most cases.
+- [ ] gfycat :clown_face: gfycat will still not work in most cases.
 
 
 
