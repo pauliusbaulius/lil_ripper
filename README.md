@@ -57,3 +57,7 @@ python lilripper.py
 python3 lilripper.py -r cars -u 100 -d /run/media/joe_mama/hoarding/downloads
 
 ```
+
+
+## Miscellaneous
+I have exams until mid of april, so no major updates and fixes until then. It will work fine if you want to archive subs without many gfycat links. :alien:
