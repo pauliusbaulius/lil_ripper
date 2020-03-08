@@ -5,6 +5,7 @@ from datetime import time, timedelta
 import time
 import requests
 from modules import imgur, gfycat, reddit
+from fake_useragent import UserAgent
 
 # If no path is specified in CLI, uses current directory as base path.
 BASE_DOWNLOAD_PATH = os.getcwd()
@@ -168,10 +169,10 @@ def check_dupes(urls):
     """
     amount_start = len(urls)
     print(f"{len(urls)} have been given.")
-    # todo when it works, remove dupe checking from downloader!
     # First, remove duplicate links from list.
     urls = list(dict.fromkeys(urls))
     # Second, remove links of already downloaded files.
+    # todo check file stems only. do not look at file ending!
     # todo multiprocessing here too?
     # for url in urls:
     #     status = check_if_downloaded(BASE_DOWNLOAD_PATH, filename=str(url).split("/")[-1])
@@ -205,7 +206,7 @@ def download_file_new(url, path):
             time.sleep(random.randint(30, 60))
         # todo select random header from list of headers
         request = requests.get(url, headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
+            'User-Agent': str(UserAgent().random)})
         # Save file content to variable.
         file_content = request.content
         # todo check whether this impacts some subreddits that could host images smaller than 10KB.
@@ -292,7 +293,7 @@ def download_file(url, path):
                 time.sleep(random.randint(15, 30))
             # todo select random header from list of headers
             request = requests.get(url, headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
+            'User-Agent': str(UserAgent().random)})
             # Save file content to variable.
             file_content = request.content
             # todo check whether this impacts some subreddits that could host images smaller than 10KB.
@@ -347,4 +348,6 @@ if __name__ == "__main__":
     print("Will run tests.")
     # todo run tests
     #ripper(subreddit_name="dankmemes", min_upvotes=50000)
+    ua = UserAgent()
+    print(str(ua.random))
 

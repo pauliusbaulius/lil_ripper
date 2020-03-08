@@ -2,6 +2,7 @@ import os
 import subprocess
 import requests
 from modules import new_ripper
+from fake_useragent import UserAgent
 
 """
 Reddit's video posts are hosted on v.redd.it. Reddit does not let you download those videos directly, 
@@ -44,7 +45,7 @@ def download_reddit_webm(url, download_path):
             json_url = url + ".json"
             # Download post json file and make it into json object.
             r = requests.get(json_url, headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
+            'User-Agent': str(UserAgent().random)})
             json_data = r.json()
             # Extract webm url from json data...
             webm_url = json_data[0]["data"]["children"][0]["data"]["media"]["reddit_video"]["fallback_url"]

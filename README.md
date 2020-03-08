@@ -4,6 +4,8 @@ A multiprocess-python program for subreddit archiving purposes. It will try to e
 
 Requires ffmpeg to merge webm audio and video files!
 
+Also, do not count on gfycat ripping, they use cloudflare and all the other :clown_face:
+
 ## Features
 
 :clown_face:Does not download already downloaded files if same directory is given.
@@ -23,7 +25,7 @@ Requires ffmpeg to merge webm audio and video files!
 - [x] imgur direct link
 - [x] imgur album
 - [x] imgur album with one item aka no /a/ in link
-- [x] gfycat
+- [x] gfycat :clown_face: gfycat will still not work in most cases.
 
 
 
