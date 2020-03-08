@@ -17,3 +17,6 @@
 - handle gfycat blacklisting somehow.. play around with random headers? -> does not work.
     - look into proxies? https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
       but cloudflare probably figured this out before me lol
+    - add --gfycat flag that removes multiprocessing and slowly crawls? should reduce requests by a lot with trade-off of long archiving.
+
+- stop execution when pressing ctrl+c and still show stats + cancel all processes!

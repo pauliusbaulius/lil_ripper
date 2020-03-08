@@ -57,7 +57,7 @@ def ripper(subreddit_name, download_location=BASE_DOWNLOAD_PATH, min_upvotes=10,
 def create_dir(base_path, new_dir):
     """
     If directory does not exist, make one. Otherwise return already existing directory.
-    :param base_dir: base directory where to create new directory.
+    :param base_path: base directory where to create new directory.
     :param new_dir: name of the new directory.
     :return: path to new/existing directory.
     """
@@ -164,20 +164,26 @@ def generate_urls_from_json(json_url):
 
 def check_dupes(urls):
     """
-    Given a list of urls, checks for duplicates and then checks
-    for already downloaded files using url ending as filename.
+    Given a list of urls, checks for duplicates in url list and filesystem.
+    It is a primitive checker, since it compares filenames with link endings,
+    some existing files will not be detected. And files in imgur albums won't
+    be checked for dupes too. But it will sort itself out in download method.
     """
     amount_start = len(urls)
     print(f"{len(urls)} have been given.")
     # First, remove duplicate links from list.
     urls = list(dict.fromkeys(urls))
     # Second, remove links of already downloaded files.
-    # todo check file stems only. do not look at file ending!
+    # Get all files in directory without extensions.
+    os.chdir(BASE_DOWNLOAD_PATH)
+    files_no_ext = [f.lower() for f in os.listdir() if os.path.isfile(f)]
+    # todo convert to hashmap or something more efficient!
     # todo multiprocessing here too?
-    # for url in urls:
-    #     status = check_if_downloaded(BASE_DOWNLOAD_PATH, filename=str(url).split("/")[-1])
-    #     if status:
-    #         urls.remove(url)
+    for url in urls:
+        gfycat_filename = str(url).lower().split("/")[-1] + "-mobile"
+        filename = str(url).lower().split("/")[-1]
+        if filename in files_no_ext or gfycat_filename in files_no_ext:
+            urls.remove(url)
     print(f"Removed {amount_start - len(urls)} duplicates and already downloaded links, {len(urls)} are left to download.")
     return urls
 
@@ -202,8 +208,7 @@ def download_file_new(url, path):
         time.sleep(random.randint(1, 5))
         # Wait for 5-15 seconds between gfycat requests to not get ip ban.
         if gfycat.is_gfycat_link(url):
-            print("will sleep now")
-            time.sleep(random.randint(30, 60))
+            time.sleep(random.randint(5, 60))
         # todo select random header from list of headers
         request = requests.get(url, headers={
             'User-Agent': str(UserAgent().random)})
@@ -290,10 +295,8 @@ def download_file(url, path):
             time.sleep(random.randint(1, 5))
             # Wait for 5-15 seconds between gfycat requests to not get ip ban.
             if gfycat.is_gfycat_link(url):
-                time.sleep(random.randint(15, 30))
-            # todo select random header from list of headers
-            request = requests.get(url, headers={
-            'User-Agent': str(UserAgent().random)})
+                time.sleep(random.randint(10, 60))
+            request = requests.get(url, headers={'User-Agent': str(UserAgent().random)})
             # Save file content to variable.
             file_content = request.content
             # todo check whether this impacts some subreddits that could host images smaller than 10KB.
@@ -348,6 +351,6 @@ if __name__ == "__main__":
     print("Will run tests.")
     # todo run tests
     #ripper(subreddit_name="dankmemes", min_upvotes=50000)
-    ua = UserAgent()
-    print(str(ua.random))
+    check_dupes(["imgur"])
+
 
