@@ -56,6 +56,9 @@ python lilripper.py
 # Download from r/cars, posts with >= 100 upvotes and store in custom directory.
 python3 lilripper.py -r cars -u 100 -d /run/media/joe_mama/hoarding/downloads
 
+# Make it executable to not have to write python each time you want to launch it.
+chmod +x lilripper.py
+./lilripper.py --rip dankmemes --min-upvotes 50000 --download-path /home/joe_mama/downloads
 ```
 
 
