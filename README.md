@@ -22,6 +22,7 @@ Also, do not count on gfycat ripping, they use cloudflare and all the other :clo
 ## Supported download links
 - [x] direct link ending in valid format given by user
 - [x] i.reddit
+- [x] v.reddit aka webms!
 - [x] imgur direct link
 - [x] imgur album
 - [x] imgur album with one item aka no /a/ in link
