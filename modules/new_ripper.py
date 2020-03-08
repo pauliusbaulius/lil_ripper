@@ -7,8 +7,7 @@ import requests
 from modules import imgur, gfycat, reddit
 
 # If no path is specified in CLI, uses current directory as base path.
-# todo do not forget to set to os.getcwd() when merging to master!!!!
-BASE_DOWNLOAD_PATH = "/run/media/joe/ProjectX/linux_downloads"
+BASE_DOWNLOAD_PATH = os.getcwd()
 # If no formats are specified, uses basic predefined formats.
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
@@ -202,7 +201,8 @@ def download_file_new(url, path):
         time.sleep(random.randint(1, 5))
         # Wait for 5-15 seconds between gfycat requests to not get ip ban.
         if gfycat.is_gfycat_link(url):
-            time.sleep(random.randint(15, 30))
+            print("will sleep now")
+            time.sleep(random.randint(30, 60))
         # todo select random header from list of headers
         request = requests.get(url, headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})

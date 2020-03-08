@@ -40,7 +40,7 @@ def extract_gfycat_direct_link(url):
         # bs4 to get that video link.
         return soup.find("meta", property="og:video")["content"]
     except TypeError:
-        print(f"Gfycat video [{url}] has been deleted.")
+        print(f"Gfycat video [{url}] has been deleted/your IP is banned.")
     except Exception as error:
         print("Failed to extract gfycat video link...", error)
 

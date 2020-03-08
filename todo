@@ -2,14 +2,15 @@
 - compress images to reduce storage usage if user picks --compress
   - show compression gains
 + rip from csv list with subreddits
-- show total network usage
+    - test if ripping from csv works..
 + new and improved pushshift iterator
-- call lil ripper using args in terminal
-- pytests, because i have like 10% test coverage rn, if not less.
-- test if ripping from csv works...
++ call lil ripper using args in terminal
+- pytests, because i have like 10% test coverage rn, if not less..
 
 # Optimization of dupe checking.
 - extract download links from all jsons in one list
-    - remove duplicates
+    + remove duplicates
     - check if already downloaded
     - start multiple processes and work on list of remaining, yet not downloaded urls
+
+- handle gfycat blacklisting somehow.. play around with random headers?
