@@ -18,5 +18,17 @@
     - look into proxies? https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
       but cloudflare probably figured this out before me lol
     - add --gfycat flag that removes multiprocessing and slowly crawls? should reduce requests by a lot with trade-off of long archiving.
+    - ? add queue for gfycat links, parse each 60s in single process
 
 - stop execution when pressing ctrl+c and still show stats + cancel all processes!
+
+# rewrite idea
+1. generate all jsons
+2. pull out all urls into one big list
+3. eliminate dupes
+    3.1 convert to dict and back to remove dupe urls
+    3.2 go over all files in dir and compare urls with filenames.
+4. pass url list to downloader_queue
+    4.1 if gfycat link, add to gfycat_queue
+        4.1.1 gfycat queue has long wait times, checks if request is 403, waits 5mins
+    4.2 download using multiprocessing
