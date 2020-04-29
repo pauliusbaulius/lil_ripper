@@ -4,7 +4,7 @@ import random
 from datetime import time, timedelta
 import time
 import requests
-from modules import imgur, gfycat, reddit
+from src import imgur, gfycat, reddit
 from fake_useragent import UserAgent
 
 # If no path is specified in CLI, uses current directory as base path.
@@ -65,7 +65,7 @@ def create_dir(base_path, new_dir):
     # todo Create dirs for given path if they do not exist yet.
     full_path = os.path.join(base_path, new_dir)
     if not os.path.exists(full_path):
-        os.mkdir(full_path)
+        os.mkdirs(full_path)
         print(f"New directory [{full_path}] was created.")
         return full_path
     else:

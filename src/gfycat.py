@@ -1,4 +1,4 @@
-from modules import new_ripper
+from src import new_ripper
 from bs4 import BeautifulSoup
 import requests
 

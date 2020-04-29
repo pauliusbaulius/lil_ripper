@@ -1,7 +1,7 @@
 import os
 import subprocess
 import requests
-from modules import new_ripper
+from src import new_ripper
 from fake_useragent import UserAgent
 
 """

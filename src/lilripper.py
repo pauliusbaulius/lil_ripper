@@ -3,7 +3,7 @@
 import argparse
 import os
 import sys
-from modules import tools, new_ripper
+from src import tools, new_ripper
 
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 

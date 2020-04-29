@@ -1,6 +1,6 @@
 import re
 import requests
-from modules import new_ripper
+from src import new_ripper
 
 """
 Since imgur wants you to create user account to access read-only api which also required to give your email and phone number,
