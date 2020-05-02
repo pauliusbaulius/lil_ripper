@@ -129,6 +129,5 @@ dmypy.json
 .pyre/
 
 # My stuff
-testing_grounds/
-downloads/
-databases/ripper.db
+src/lil_ripper.egg-info
+
