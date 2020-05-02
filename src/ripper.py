@@ -13,7 +13,7 @@ BASE_DOWNLOAD_PATH = os.getcwd()
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
 
-def ripper(subreddit_name, download_location=BASE_DOWNLOAD_PATH, min_upvotes=10, formats=DOWNLOAD_FORMATS):
+def ripper(subreddit_name, formats, download_location, min_upvotes):
     """
     -1. Create download directory. (create_dir:download_path, subreddit_name)
     -2. Create <subreddit_name>.csv in download directory. (create_csv:directory, name)

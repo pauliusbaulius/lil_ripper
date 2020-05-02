@@ -37,6 +37,7 @@ def get_args(arguments=sys.argv[1:]):
 
 def handle_args(arguments):
     print(f"Starting ripping: {', '.join(arguments.rip)}")
+    print(arguments.formats)
     for item in arguments.rip:
         # If it is a csv file, extract subreddits and pass to ripper one by one.
         if str(item).endswith(".csv"):
