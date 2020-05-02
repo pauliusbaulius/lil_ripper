@@ -1,15 +1,14 @@
 ## Table of contents <a name="toc">
 
-1. [Project](#project)
-2. [Table of contents](#toc)
+1. [Table of contents](#toc)
+2. [Project](#project)
 3. [Installation](#installation)
 4. [Usage](#usage)
    1. [Developers](#developers)
 5. [Roadmap](#roadmap)
 6. [Changelog](#changelog)
-7. [More Documentation](#documentation)
-8. [Authors and acknowledment](#aaa)
-9. [License](#license)
+7. [Authors and acknowledment](#aaa)
+8. [License](#license)
 
 
 
@@ -75,7 +74,7 @@ python3 -m lilripper -r dankmemes memes -u 1000 -d /home/boolean/Downloads
 
 ### Developers <a name="developers">
 
-- pauliusbaulius
+#TODO information how to build the package, run tests and create venv.
 
 
 
@@ -90,6 +89,8 @@ python3 -m lilripper -r dankmemes memes -u 1000 -d /home/boolean/Downloads
 - [ ] show status how long it took to generate links and download each file. maybe a progress bar?
 - [ ] add image/video compression option to reduce size of media on disk in exchange for cpu usage and electricity.
 
+
+
 ## Changelog <a name="changelog">
 
 No changelog yet. Will come in beta phase.
@@ -98,8 +99,10 @@ No changelog yet. Will come in beta phase.
 
 ## Authors and acknowledgment <a name="aaa">
 
+Nothing yet, reserved for contributors.
+
 
 
 ## License <a name="license">
 
-This project is licensed under [MIT](https://choosealicense.com/licenses/mit/) License..
+This project is licensed under [MIT](https://choosealicense.com/licenses/mit/) License.
