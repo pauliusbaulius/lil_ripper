@@ -1,3 +1,5 @@
-beautifulsoup4
-requests
-praw
+beautifulsoup4>=4.9.0
+praw>=7.0.0
+requests>=2.23.0
+fake-useragent>=0.1.11    
+

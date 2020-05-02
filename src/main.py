@@ -3,7 +3,7 @@
 import argparse
 import os
 import sys
-from modules import tools, new_ripper
+from src import tools, ripper
 
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
@@ -37,18 +37,17 @@ def handle_args(arguments):
         if str(item).endswith(".csv"):
             subreddits = tools.load_csv(item)
             for subreddit in subreddits:
-                new_ripper.ripper(subreddit_name=subreddit,
-                                  download_location=arguments.download_path,
-                                  min_upvotes=arguments.min_upvotes,
-                                  formats=arguments.formats)
-        else:
-            new_ripper.ripper(subreddit_name=item,
+                ripper.ripper(subreddit_name=subreddit,
                               download_location=arguments.download_path,
                               min_upvotes=arguments.min_upvotes,
                               formats=arguments.formats)
+        else:
+            ripper.ripper(subreddit_name=item,
+                          download_location=arguments.download_path,
+                          min_upvotes=arguments.min_upvotes,
+                          formats=arguments.formats)
 
 
 if __name__ == "__main__":
     args = get_args()
     handle_args(args)
-

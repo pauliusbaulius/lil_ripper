@@ -1,4 +1,4 @@
-from modules import new_ripper
+from src import ripper
 from bs4 import BeautifulSoup
 import requests
 
@@ -13,19 +13,19 @@ def is_gfycat_link(url):
 def handle_gfycat_url(url, path):
     # If gfycat link is an URI, do not try to extract.
     if str(url).endswith(".mp4"):
-        new_ripper.download_file(url, path)
+        ripper.download_file(url, path)
     else:
         # Otherwise, extract media link from page.
         new_url = extract_gfycat_direct_link(url)
         # todo handle None here, do not send to downloader.
         if new_url is not None:
-            new_ripper.download_file(new_url, path)
+            ripper.download_file(new_url, path)
 
 
 @DeprecationWarning
 def download_gfycat_video(url, directory):
     download_location = extract_gfycat_direct_link(url)
-    new_ripper.download_file(path=download_location, url=url)
+    ripper.download_file(path=download_location, url=url)
 
 
 def extract_gfycat_direct_link(url):

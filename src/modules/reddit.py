@@ -1,7 +1,7 @@
 import os
 import subprocess
 import requests
-from modules import new_ripper
+from src import ripper
 from fake_useragent import UserAgent
 
 """
@@ -39,7 +39,7 @@ def download_reddit_webm(url, download_path):
         # Post id will be filename
         webm_filename = str(url).split("/")[-3]
         # Check if there is one downloaded already.
-        if not new_ripper.check_if_downloaded(download_path, f"reddit_{webm_filename}.mp4"):
+        if not ripper.check_if_downloaded(download_path, f"reddit_{webm_filename}.mp4"):
             audio_filename = webm_filename + "_audio"
             # Json url is just reddit post url with ".json" appended to the end.
             json_url = url + ".json"
@@ -68,7 +68,7 @@ def download_file(webm_filename, webm_url, download_path):
     webm_content = requests.get(webm_url).content
     with open(os.path.join(download_path, webm_filename), "wb") as f:
         f.write(webm_content)
-        size = new_ripper.sizeof_fmt(os.fstat(f.fileno()).st_size)
+        size = ripper.sizeof_fmt(os.fstat(f.fileno()).st_size)
         print(f"Downloaded [{webm_url}] [{size}]")
         return True
 

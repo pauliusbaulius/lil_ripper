@@ -1,6 +1,6 @@
 import re
 import requests
-from modules import new_ripper
+from src import ripper
 
 """
 Since imgur wants you to create user account to access read-only api which also required to give your email and phone number,
@@ -50,10 +50,10 @@ def download_imgur_album(url, formats, path):
         album_image_urls = find_all_album_media(url)
         if album_image_urls is not None:
             # Create new dir with album id as name
-            album_directory = new_ripper.create_dir(base_path=path, new_dir=album_name)
+            album_directory = ripper.create_dir(base_path=path, new_dir=album_name)
             for file_url in album_image_urls:
-                if new_ripper.is_downloadable(url=file_url, formats=formats):
-                    new_ripper.download_file(url=file_url, path=album_directory)
+                if ripper.is_downloadable(url=file_url, formats=formats):
+                    ripper.download_file(url=file_url, path=album_directory)
     except TypeError:
         print("Imgur album has been does not exist anymore, skipping...")
 
