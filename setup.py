@@ -4,15 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="lil_ripper",
-    version="0.0.2",
+    name="lilripper",
+    version="0.0.5",
     description="Reddit subreddit archival tool, can download pictures, videos, gifs from i.reddit, v.reddit, imgur, gfycat. Requires ffmpeg to download v.reddit videos.",
     author="pauliusbaulius",
     license="MIT",
+    url="https://github.com/pauliusbaulius/lil_ripper",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    #py_modules=[""],
-    #package_dir={"": "src"},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
@@ -29,8 +28,12 @@ setup(
         "fake-useragent >= 0.1.11"
     ],
     packages=find_packages(),
+    python_requires=">=3.8"
+    # FIXME Stuff that is not needed? No idea what to do with it. Gonna need some help.
     #scripts=["src/cli.py"]
-    entry_points={
-        "console_scripts": ["ripper=src.cli:main"] # TODO this is okay?
-    }
+    # entry_points={
+    #     "console_scripts": ["lilripper=src.cli:main"]
+    # }
+    # py_modules=[""],
+    # package_dir={"": "src"},
 )

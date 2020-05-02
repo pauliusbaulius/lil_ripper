@@ -8,6 +8,11 @@ from src import tools, ripper
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
 
+def main():
+    args = get_args()
+    handle_args(args)
+
+
 def get_args(arguments=sys.argv[1:]):
     parser = argparse.ArgumentParser(description="lil ripper, your #1 choice for subreddit archiving!")
     # Only allow to either index or rip, not both at once!
@@ -49,5 +54,4 @@ def handle_args(arguments):
 
 
 if __name__ == "__main__":
-    args = get_args()
-    handle_args(args)
+    main()

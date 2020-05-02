@@ -2,4 +2,4 @@
 
 from src import cli
 
-cli.get_args()
+cli.main()

@@ -54,7 +54,7 @@ python lilripper.py
 
 ```bash
 # Download from r/dankmemes, posts with >= 10000 upvotes and store in custom directory.
-python3 src/main.py -r dankmemes -u 10000 -d /home/paulius/Downloads
+python3 ripper.py -r dankmemes -u 10000 -d /home/paulius/Downloads
 ```
 
 
