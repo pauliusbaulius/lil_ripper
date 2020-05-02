@@ -92,7 +92,7 @@ python3 -m lilripper -r dankmemes memes -u 1000 -d /home/boolean/Downloads
 
 ## Changelog <a name="changelog">
 
-All changes are documented in CHANGELOG.md file in the root directory.
+No changelog yet. Will come in beta phase.
 
 
 
