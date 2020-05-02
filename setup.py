@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="lil-ripper",
+    name="lil_ripper",
     version="0.0.2",
     description="Reddit subreddit archival tool, can download pictures, videos, gifs from i.reddit, v.reddit, imgur, gfycat. Requires ffmpeg to download v.reddit videos.",
     author="pauliusbaulius",
