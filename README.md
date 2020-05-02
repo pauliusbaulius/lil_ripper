@@ -88,6 +88,7 @@ python3 -m lilripper -r dankmemes memes -u 1000 -d /home/boolean/Downloads
 - [ ] add pytest tests, something I have to learn to write.
 - [ ] a better way to quit program, since ctrl+c does not cancel all threads at once.
 - [ ] show status how long it took to generate links and download each file. maybe a progress bar?
+- [ ] add image/video compression option to reduce size of media on disk in exchange for cpu usage and electricity.
 
 ## Changelog <a name="changelog">
 
@@ -96,8 +97,6 @@ All changes are documented in CHANGELOG.md file in the root directory.
 
 
 ## Authors and acknowledgment <a name="aaa">
-
-[Martin Heinz](https://martinheinz.dev/) for his Python template setup, which I modified and adapted right here.
 
 
 
