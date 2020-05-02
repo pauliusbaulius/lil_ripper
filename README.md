@@ -1,3 +1,16 @@
+## Table of contents <a name="toc">
+
+1. [Project](#project)
+2. [Table of contents](#toc)
+3. [Installation](#installation)
+4. [Usage](#usage)
+   1. [Developers](#developers)
+5. [Roadmap](#roadmap)
+6. [Changelog](#changelog)
+7. [More Documentation](#documentation)
+8. [Authors and acknowledment](#aaa)
+9. [License](#license)
+
 
 
 # lil_ripper <a name="project">
@@ -19,21 +32,6 @@ Since this project does not eploy proxies, you may encounter trouble with subred
 - [x] imgur album
 - [x] imgur album with one item aka no /a/ in link
 - [x] gfycat video
-
-
-
-## Table of contents <a name="toc">
-
-1. [Project](#project)
-2. [Table of contents](#toc)
-3. [Installation](#installation)
-4. [Usage](#usage)
-   1. [Developers](#developers)
-5. [Roadmap](#roadmap)
-6. [Changelog](#changelog)
-7. [More Documentation](#documentation)
-8. [Authors and acknowledment](#aaa)
-9. [License](#license)
 
 
 
