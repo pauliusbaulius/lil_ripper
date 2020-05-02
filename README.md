@@ -20,7 +20,7 @@ Lil ripper is a media archival tool for subreddits. It downloads images and vide
 
 Since this project does not eploy proxies, you may encounter trouble with subreddits that contain a lot of gfycat links. Gfycat does not like people scrapping their website and will blacklist your IP for several hours, if you make a lot of requests. This is a problem I am trying to solve in next updates.
 
-
+![https://i.imgur.com/BsNMI3a.png](https://i.imgur.com/BsNMI3a.png)
 
 ### Currently supported links
 
