@@ -345,9 +345,5 @@ def sizeof_fmt(num, suffix='B'):
 
 
 if __name__ == "__main__":
-    print("Will run tests.")
-    # todo run tests
-    #ripper(subreddit_name="dankmemes", min_upvotes=50000)
-    ua = UserAgent()
-    print(str(ua.random))
+    pass
 
