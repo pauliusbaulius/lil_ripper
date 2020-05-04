@@ -1,9 +1,9 @@
 import os
 import random
 from datetime import time
-import time
 import requests
 from fake_useragent import UserAgent
+import time
 
 
 def timer(func):
@@ -19,7 +19,7 @@ def timer(func):
 
 def create_dir(base_path: str, new_dir: str) -> str:
     """
-    If directory does not exist, make one. Otherwise return already existing directory.
+    If directory does not exist, make one. Otherwise return existing directory.
     :param base_path: base directory where to create new directory.
     :param new_dir: name of the new directory.
     :return: path to new/existing directory.
@@ -35,7 +35,6 @@ def create_dir(base_path: str, new_dir: str) -> str:
 
 
 def download_file_new(url: str, path: str, formats: list):
-    # TODO migrate to this downloader, since it supports format check.
     """
     Given a download path and file url, tries to download it.
     + Checks if file already exists before trying to download, skips if item
@@ -48,7 +47,7 @@ def download_file_new(url: str, path: str, formats: list):
     Returns status as boolean, True if file was downloaded, False if it wasn't.
     :param path: Download location.
     :param url: Link to resource to download.
-    :return: True if file has been downloaded, False if file failed to download.
+    :return: True if file has been downloaded, False otherwise.
     """
     try:
         before = time.time()

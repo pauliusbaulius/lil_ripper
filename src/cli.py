@@ -11,6 +11,7 @@ DEFAULT_DOWNLOAD_PATH = os.getcwd()
 
 
 def main():
+    # TODO logger init here!
     args = get_args()
     handle_args(args)
 
@@ -31,7 +32,6 @@ def get_args(arguments=None):
                        type=str,
                        help="4Chan thread(s) to download."
                        )
-
     parser.add_argument("-u", "--min-upvotes",
                         type=int,
                         help="Minimum amount of upvotes to download a post. "
@@ -49,7 +49,7 @@ def get_args(arguments=None):
 
 
 def handle_args(arguments):
-    #print(arguments) # TODO debug, remove when building package!
+    # print(arguments) # TODO debug, remove when building package!
 
     if arguments.reddit is not None:
         handle_reddit(arguments)
