@@ -17,25 +17,23 @@ def handle_gfycat_url(url, path):
     else:
         # Otherwise, extract media link from page.
         new_url = extract_gfycat_direct_link(url)
-        # todo handle None here, do not send to downloader.
+        # FIXME sleep(random(30-60)) here?
         if new_url is not None:
             ripper.download_file(new_url, path)
-
-
-@DeprecationWarning
-def download_gfycat_video(url, directory):
-    download_location = extract_gfycat_direct_link(url)
-    ripper.download_file(path=download_location, url=url)
+        else:
+            pass
 
 
 def extract_gfycat_direct_link(url):
     # todo pytest and make it return booleans
     """
-    Gets gfycat site html and extracts video download link. If something goes wrong, it prints a statement and skips this url.
+    Gets gfycat site html and extracts video download link.
+    If something goes wrong, it prints a statement and skips this url.
     """
     try:
         r = requests.get(url,  headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) '
+                              'Gecko/20100101 Firefox/12.0'})
         soup = BeautifulSoup(r.text, "html.parser")
         # bs4 to get that video link.
         return soup.find("meta", property="og:video")["content"]
@@ -46,4 +44,4 @@ def extract_gfycat_direct_link(url):
 
 
 if __name__ == "__main__":
-    print("Will run tests.")
+    pass

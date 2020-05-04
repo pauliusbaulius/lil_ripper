@@ -43,6 +43,7 @@ def extract_thread_name(thread_url: str) -> str:
     return thread_url.split("/")[-1]
 
 
+# TODO add formats option, probably need to update download_file function!
 def download_thread(url: str, download_path: str):
     # Check if it is a thread first, if not - exit.
     if is_4chan_thread(url):
@@ -54,6 +55,7 @@ def download_thread(url: str, download_path: str):
     thread_name = extract_thread_name(url)
     download_path = ripper.create_dir(download_path, thread_name)
 
+    # TODO multithreading here!
     urls = extract_thread_media_urls(url)
     for url in urls:
         ripper.download_file(url, download_path)

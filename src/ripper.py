@@ -13,7 +13,20 @@ BASE_DOWNLOAD_PATH = os.getcwd()
 DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 
 
-def ripper(subreddit_name, formats, download_location, min_upvotes):
+def timer(func):
+    def f(x, y):
+        before = time()
+        return_value = func(x, y)
+        after = time()
+        # TODO add this to DEBUG logger with time in ms/s and func name
+        print(f"calculated in {after - before}")
+        return return_value
+
+    return f
+
+# TODO move all reddit related functions to reddit.py and leave this class
+#  for general purpose tools
+def download_subreddit(subreddit_name, formats, download_location, min_upvotes):
     """
     -1. Create download directory. (create_dir:download_path, subreddit_name)
     -2. Create <subreddit_name>.csv in download directory. (create_csv:directory, name)
@@ -46,23 +59,23 @@ def ripper(subreddit_name, formats, download_location, min_upvotes):
     DOWNLOAD_FORMATS = formats
     # Generate json urls for subreddit.
     print("Generating download links, might take a while...")
-    json_urls = generate_pushift_urls(subreddit_name, int(time.time()), 1, min_upvotes, batch_size=1000)
+    json_urls = generate_pushift_urls(subreddit_name, int(time.time()), 1,
+                                      min_upvotes, batch_size=1000)
     # Download files from each json
     for url in json_urls:
         download_from_json(url)
     elapsed_time = time.time() - start_time
-    print(f"Downloading finished, took {timedelta(seconds=round(elapsed_time))}.")
+    print(
+        f"Downloading finished, took {timedelta(seconds=round(elapsed_time))}.")
 
 
-def create_dir(base_path, new_dir):
+def create_dir(base_path: str, new_dir: str) -> str:
     """
     If directory does not exist, make one. Otherwise return already existing directory.
-    :param base_dir: base directory where to create new directory.
+    :param base_path: base directory where to create new directory.
     :param new_dir: name of the new directory.
     :return: path to new/existing directory.
     """
-    #todo https://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
-    # todo Create dirs for given path if they do not exist yet.
     full_path = os.path.join(base_path, new_dir)
     if not os.path.exists(full_path):
         os.makedirs(full_path)
@@ -73,36 +86,8 @@ def create_dir(base_path, new_dir):
         return full_path
 
 
-def create_csv(filename):
-    """Given a base path and a new filename, creates a .csv file."""
-    global BASE_DOWNLOAD_PATH
-
-
-def sort_csv(filename):
-    """Given path and .csv filename, sorts the file by utc_from field."""
-    global BASE_DOWNLOAD_PATH
-
-
-def get_csv_newest_utc(filename):
-    """
-    Given path and .csv filename, returns highest utc_from value.
-    Assumes that the file is sorted by utc_from.
-    # todo Maybe sort the file before looking to make sure? And reduce possible malfunctions.
-    """
-    global BASE_DOWNLOAD_PATH
-
-
-def get_csv_oldest_utc(filename):
-    """
-    Given path and .csv filename, returns lowest utc_to value.
-    Assumes that the file is sorted by utc_from.
-    # todo Maybe sort the file before looking to make sure? And reduce possible malfunctions.
-    """
-    global BASE_DOWNLOAD_PATH
-    pass
-
-
-def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes, batch_size=1000):
+def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes,
+                          batch_size=1000):
     """
     Given a subreddit, utc times, minimum upvote count and batch size,
     generates appropriate pushift json urls and stores them in a list.
@@ -117,6 +102,8 @@ def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes, batch_size=1
     json_links = []
     try:
         while True and utc_from > utc_to:
+            # TODO maybe we can specify file formats too? To reduce amount of
+            #  links.
             json_link = f"https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit}" \
                         f"&sort=desc&sort_type=created_utc&before={utc_from}&score=>{min_upvotes - 1}&size={batch_size}&is_self=false"
             json_links.append(json_link)
@@ -126,7 +113,8 @@ def generate_pushift_urls(subreddit, utc_from, utc_to, min_upvotes, batch_size=1
             time.sleep(1)
     except IndexError:
         # When all json files are generated, break loop and finish.
-        print(f"{len(json_links)} json links were generated. Will start downloading...")
+        print(f"{len(json_links)} json links were generated. "
+              f"Will start downloading...")
     finally:
         return json_links
 
@@ -178,55 +166,9 @@ def check_dupes(urls):
     #     status = check_if_downloaded(BASE_DOWNLOAD_PATH, filename=str(url).split("/")[-1])
     #     if status:
     #         urls.remove(url)
-    print(f"Removed {amount_start - len(urls)} duplicates and already downloaded links, {len(urls)} are left to download.")
+    print(
+        f"Removed {amount_start - len(urls)} duplicates and already downloaded links, {len(urls)} are left to download.")
     return urls
-
-
-# todo alternative version without dupe checking, assumes that dupes are checked before, worst case - stuff will be overwritten
-def download_file_new(url, path):
-    """
-    Given a download path and file url, tries to download it.
-    - Checks if file already exists before trying to download, skips if item exists.
-    - Names files by their url endings.
-    - Does not download files under 10KB to prevent downloading of deleted imgur image placeholders
-    and other unwanted data!
-    Returns status as boolean, True if file was downloaded, False if it wasn't.
-    :param path: Download location.
-    :param url: Link to resource to download.
-    :return: True if file has been downloaded, False if file failed to download.
-    """
-    try:
-        # Filename is url ending.
-        filename = str(url).split("/")[-1]
-        # Do not be greedy.
-        time.sleep(random.randint(1, 5))
-        # Wait for 5-15 seconds between gfycat requests to not get ip ban.
-        if gfycat.is_gfycat_link(url):
-            print("will sleep now")
-            time.sleep(random.randint(30, 60))
-        # todo select random header from list of headers
-        request = requests.get(url, headers={
-            'User-Agent': str(UserAgent().random)})
-        # Save file content to variable.
-        file_content = request.content
-        # todo check whether this impacts some subreddits that could host images smaller than 10KB.
-        # Do not download files under 10KB to not download imgur deleted images and other most likely non-trivial stuff.
-        if len(file_content) > 10240:
-            # Save file to disk.
-            with open(os.path.join(path, filename), "wb") as f:
-                f.write(file_content)
-                # Calculate size in human-readable format for displaying purposes.
-                size = sizeof_fmt(os.fstat(f.fileno()).st_size)
-                print(f"Downloaded [{url}] [{size}]")
-                return True
-        else:
-            print(f"File [{url}] is under 10KB in size, skipping download...")
-            return False
-    except Exception as error:
-        # todo fix this band-aid exception, it works but it doesn't really tell why the problem happened.
-        print(f"Downloading [{url}] has failed, skipping...")
-        print(error)
-        return False
 
 
 def handle_media_url(url):
@@ -250,7 +192,8 @@ def handle_media_url(url):
     elif imgur.is_imgur_album(url):
         print(f"Downloading imgur album [{url}]")
         # Need to pass dir to make imgur folder in subreddit folder.
-        imgur.download_imgur_album(url=url, formats=DOWNLOAD_FORMATS, path=BASE_DOWNLOAD_PATH)
+        imgur.download_imgur_album(url=url, formats=DOWNLOAD_FORMATS,
+                                   path=BASE_DOWNLOAD_PATH)
     # If it is gfycat link...
     elif gfycat.is_gfycat_link(url):
         print(f"Downloading gfycat video [{url}]")
@@ -264,9 +207,12 @@ def handle_media_url(url):
 
 
 def is_downloadable(url, formats):
-    """Given one url and a list of formats, check whether the link leads to file we want to download."""
+    """Given one url and a list of formats,
+    check whether the link leads to file we want to download."""
     # If it is a .gifv and .mp4 is to be downloaded, use that extra ugly check.
-    return str(url).endswith(tuple(formats)) or str(url).endswith("gifv") and "mp4" in tuple(formats)
+    return str(url).endswith(tuple(formats)) \
+        or str(url).endswith("gifv") \
+        and "mp4" in tuple(formats)
 
 
 def download_file(url, path):
@@ -291,9 +237,9 @@ def download_file(url, path):
             # Wait for 5-15 seconds between gfycat requests to not get ip ban.
             if gfycat.is_gfycat_link(url):
                 time.sleep(random.randint(15, 30))
-            # todo select random header from list of headers
+            # TODO generate user agent with fake_useragent
             request = requests.get(url, headers={
-            'User-Agent': str(UserAgent().random)})
+                'User-Agent': str(UserAgent().random)})
             # Save file content to variable.
             file_content = request.content
             # todo check whether this impacts some subreddits that could host images smaller than 10KB.
@@ -307,7 +253,8 @@ def download_file(url, path):
                     print(f"Downloaded [{url}] [{size}]")
                     return True
             else:
-                print(f"File [{url}] is under 10KB in size, skipping download...")
+                print(
+                    f"File [{url}] is under 10KB in size, skipping download...")
                 return False
         else:
             print(f"File [{filename}] already exists, skipping download...")
@@ -321,7 +268,7 @@ def download_file(url, path):
 
 def check_if_downloaded(path, filename):
     """
-    Given a download path and filename, checks whether a file already exists or not.
+    Given a path and filename, checks whether a file already exists or not.
     Returns True if file exists.
     :param path:
     :param filename:
@@ -334,8 +281,10 @@ def check_if_downloaded(path, filename):
 
 def sizeof_fmt(num, suffix='B'):
     """
-    Calculates file size in human-readable format. Copy-pasted from StackOverflow, thanks to this dude:
-    https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+    Calculates file size in human-readable format.
+    Copy-pasted from StackOverflow, thanks to this dude:
+    https://stackoverflow.com/questions/1094841/
+    reusable-library-to-get-human-readable-version-of-file-size
     """
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
@@ -346,4 +295,3 @@ def sizeof_fmt(num, suffix='B'):
 
 if __name__ == "__main__":
     pass
-

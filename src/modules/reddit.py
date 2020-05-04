@@ -12,11 +12,13 @@ together using ffmpeg. It is a workaround, but it seems to work fine.
 Requests also uses Firefox user's header, because reddit does not like programs interacting with them,
 without a header, you will get HTTP ERROR 429.
 """
-# todo use reddit api with a bot to not use some headers as a 3rd party scrapper.
 
 
 def is_reddit_webm(url):
-    """Hacky test to see whether the url leads to reddit video which should be a webm or not."""
+    """
+    Hacky test to see whether the url leads to reddit video,
+    which should be a webm or not.
+     """
     return "v.redd.it" in url
 
 
@@ -27,9 +29,11 @@ def download_reddit_webm(url, download_path):
     Then it will download those files and call function to merge them.
     :param url: Reddit post url containing a video.
     :param download_path: Download path to store video.
-    :return: Returns a boolean, True if everything succeeded, False if something went wrong.
+    :return: Returns a boolean, True if everything succeeded,
+    False if something went wrong.
     """
-    # todo handle exceptions better than just printing trace and returning false.
+    # TODO handle exceptions better than just printing trace and returning
+    # false.
     try:
         # If it is a v.redd.it link, get the post link!
         if url.startswith("https://v.redd.it/"):
@@ -81,6 +85,7 @@ def join_video_audio(filename_video, filename_audio, path):
         # Call shell and merge audio with video using ffmpeg.
         command = f"ffmpeg -y -i {filename_video} -i {filename_audio} -c:v copy -c:a aac -strict experimental reddit_{filename_video}"
         # stdout and stderr to hide shell output, since it would cause a lot of additional spam.
+        # TODO print stdout and stderr to log if DEBUG
         subprocess.call(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Delete audio file after merging.
         os.remove(filename_audio)
@@ -93,7 +98,4 @@ def join_video_audio(filename_video, filename_audio, path):
 
 
 if __name__ == "__main__":
-    print("Will run tests.")
-    # todo run pytests
-    #download_reddit_webm("https://www.reddit.com/r/Idiotswithguns/comments/fdxn2q/soarcarl_gets_banned_on_twitch/", "/home/joe/github/lil_ripper/testing_grounds")
-    #download_reddit_webm(download_path="/home/joe/github/lil_ripper/testing_grounds", url="https://www.reddit.com/r/Idiotswithguns/comments/fdyj21/interesting_way_to_propose/")
+    pass
