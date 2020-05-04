@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="lilripper",
-    version="0.0.6",
+    version="0.0.7",
     description="Reddit subreddit archival tool, can download pictures, videos, gifs from i.reddit, v.reddit, imgur, gfycat. Requires ffmpeg to download v.reddit videos.",
     author="pauliusbaulius",
     license="MIT",

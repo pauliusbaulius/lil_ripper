@@ -49,7 +49,7 @@ def get_args(arguments=None):
 
 
 def handle_args(arguments):
-    print(arguments) # TODO debug, remove when building package!
+    #print(arguments) # TODO debug, remove when building package!
 
     if arguments.reddit is not None:
         handle_reddit(arguments)
