@@ -25,7 +25,8 @@ def is_imgur_album(url):
 def is_imgur_single_image(url):
     # Match http and https links from imgur that do not end in URI or are albums.
     # todo [http://m.imgur.com/lqpe4i2] handle
-    regex_pattern = re.compile("https?://imgur.com/[^a/](.+)[^.jpg|.png|.gifv|.mp4]")
+    regex_pattern = re.compile(
+        "https?://imgur.com/[^a/](.+)[^.jpg|.png|.gifv|.mp4]")
     url = str(url)
     try:
         if str(re.match(regex_pattern, url).string):
@@ -50,10 +51,12 @@ def download_imgur_album(url, formats, path):
         album_image_urls = find_all_album_media(url)
         if album_image_urls is not None:
             # Create new dir with album id as name
-            album_directory = ripper.create_dir(base_path=path, new_dir=album_name)
+            album_directory = ripper.create_dir(base_path=path,
+                                                new_dir=album_name)
             for file_url in album_image_urls:
-                if ripper.is_downloadable(url=file_url, formats=formats):
-                    ripper.download_file(url=file_url, path=album_directory)
+                ripper.download_file_new(url=file_url,
+                                         path=album_directory,
+                                         formats=formats)
     except TypeError:
         print("Imgur album has been does not exist anymore, skipping...")
 
@@ -73,7 +76,8 @@ def get_album_json(album_url):
     Assumes that imgur album link is legit.
     """
     album_id = get_album_id(album_url)
-    json_link = "https://imgur.com/ajaxalbums/getimages/{}/hit.json".format(album_id)
+    json_link = "https://imgur.com/ajaxalbums/getimages/{}/hit.json".format(
+        album_id)
     r = requests.get(json_link)
     json_data = r.json()
     return json_data

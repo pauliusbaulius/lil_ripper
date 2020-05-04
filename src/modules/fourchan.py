@@ -1,7 +1,30 @@
+import concurrent.futures
+
 import requests
 from bs4 import BeautifulSoup
 import re
 import src.ripper as ripper
+
+
+def download_thread(url: str, download_path: str, formats: list):
+    # Check if it is a thread first, if not - exit.
+    if is_4chan_thread(url):
+        print(f"Downloading thread [{url}] to [{download_path}]")
+    else:
+        print(f"Invalid thread url [{url}]. Stopping ripper.")
+        exit()
+
+    thread_name = extract_thread_name(url)
+    download_path = ripper.create_dir(download_path, thread_name)
+
+    urls = extract_thread_media_urls(url)
+    # Use as many threads as the device has to speed up download and i/o.
+    with concurrent.futures.ProcessPoolExecutor() as parallel:
+        [parallel.submit(ripper.download_file_new, url, download_path, formats)
+         for url
+         in urls]
+
+    print("Downloading finished.")
 
 
 def is_4chan_thread(url: str) -> bool:
@@ -12,6 +35,10 @@ def is_4chan_thread(url: str) -> bool:
     """
     regex = re.compile("https://boards..*/thread/")
     return True if regex.match(url) else False
+
+
+def extract_thread_name(thread_url: str) -> str:
+    return thread_url.split("/")[-1]
 
 
 def extract_thread_media_urls(thread_url: str) -> list:
@@ -37,25 +64,3 @@ def construct_download_url(partial_url: str) -> str:
     :return: complete url to the resource.
     """
     return f"https:{partial_url}"
-
-
-def extract_thread_name(thread_url: str) -> str:
-    return thread_url.split("/")[-1]
-
-
-# TODO add formats option, probably need to update download_file function!
-def download_thread(url: str, download_path: str):
-    # Check if it is a thread first, if not - exit.
-    if is_4chan_thread(url):
-        print(f"Downloading thread [{url}] to [{download_path}]")
-    else:
-        print(f"Invalid thread url [{url}]. Stopping ripper.")
-        exit()
-
-    thread_name = extract_thread_name(url)
-    download_path = ripper.create_dir(download_path, thread_name)
-
-    # TODO multithreading here!
-    urls = extract_thread_media_urls(url)
-    for url in urls:
-        ripper.download_file(url, download_path)

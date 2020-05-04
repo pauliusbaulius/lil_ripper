@@ -7,7 +7,8 @@ from definitions import ROOT_DIR
 def load_csv(csv_name):
     with open(csv_name) as f:
         content = f.readlines()
-    # you may also want to remove whitespace characters like `\n` at the end of each line
+    # You may also want to remove whitespace characters like `\n` at the end
+    # of each line.
     content = [x.strip() for x in content]
     return content
 

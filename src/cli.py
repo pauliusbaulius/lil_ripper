@@ -3,10 +3,10 @@
 import argparse
 import os
 import sys
-from src import tools, ripper
-from src.modules import fourchan
+from src import ripper
+from src.modules import fourchan, reddit
 
-DEFAULT_DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "gifv", "mp4", "webm"]
+DEFAULT_DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 DEFAULT_DOWNLOAD_PATH = os.getcwd()
 
 
@@ -59,29 +59,28 @@ def handle_args(arguments):
 
 def handle_reddit(arguments):
     print(f"Starting ripping: [{', '.join(arguments.reddit)}]")
+    subreddits = []
     for item in arguments.reddit:
-        # If it is a csv file, extract subreddits and pass to ripper one by one.
-        # TODO maybe I dont need this? can be easily replaced by bash loop if
-        #  needed
+        # If it is a csv file, extract subreddits to a list.
         if str(item).endswith(".csv"):
-            subreddits = tools.load_csv(item)
-            for subreddit in subreddits:
-                ripper.download_subreddit(subreddit_name=subreddit,
-                                          download_location=arguments.download_path,
-                                          min_upvotes=arguments.min_upvotes,
-                                          formats=arguments.formats)
+            subreddits.append(ripper.load_csv(item))
         else:
-            ripper.download_subreddit(subreddit_name=item,
-                                      download_location=arguments.download_path,
-                                      min_upvotes=arguments.min_upvotes,
-                                      formats=arguments.formats)
+            subreddits.append(item)
+
+    for subreddit in subreddits:
+        reddit.download_subreddit(subreddit_name=subreddit,
+                                  download_path=arguments.download_path,
+                                  min_upvotes=arguments.min_upvotes,
+                                  formats=arguments.formats)
 
 
 def handle_fourchan(arguments):
     print(f"Starting ripping: [{', '.join(arguments.fourchan)}]")
     for url in arguments.fourchan:
         fourchan.download_thread(url=url,
-                                 download_path=arguments.download_path)
+                                 download_path=arguments.download_path,
+                                 formats=arguments.formats)
+
 
 if __name__ == "__main__":
     main()

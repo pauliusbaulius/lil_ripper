@@ -1,3 +1,6 @@
+import time
+from random import random
+
 from src import ripper
 from bs4 import BeautifulSoup
 import requests
@@ -10,16 +13,17 @@ def is_gfycat_link(url):
         return False
 
 
-def handle_gfycat_url(url, path):
+def handle_gfycat_url(url, path, formats):
     # If gfycat link is an URI, do not try to extract.
     if str(url).endswith(".mp4"):
-        ripper.download_file(url, path)
+        ripper.download_file_new(url, path, formats)
     else:
         # Otherwise, extract media link from page.
         new_url = extract_gfycat_direct_link(url)
-        # FIXME sleep(random(30-60)) here?
+        # Sleep between gfycat requests to lower chance of IP ban.
+        time.sleep(random.randint(30, 60))
         if new_url is not None:
-            ripper.download_file(new_url, path)
+            ripper.download_file_new(new_url, path, formats)
         else:
             pass
 
