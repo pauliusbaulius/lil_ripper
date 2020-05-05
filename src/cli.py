@@ -13,8 +13,11 @@ DEFAULT_DOWNLOAD_PATH = os.getcwd()
 
 
 def main():
-    args = get_args()
-    handle_args(args)
+    try:
+        args = get_args()
+        handle_args(args)
+    except KeyboardInterrupt:
+        print("Stopping...")
 
 
 def get_args(arguments=None):
