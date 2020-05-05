@@ -1,20 +1,10 @@
+import logging
 import os
 import random
 from datetime import time
 import requests
 from fake_useragent import UserAgent
 import time
-
-
-def timer(func):
-    def f(x, y):
-        before = time()
-        return_value = func(x, y)
-        after = time()
-        # TODO add this to DEBUG logger with time in ms/s and func name
-        print(f"calculated in {after - before}")
-        return return_value
-    return f
 
 
 def create_dir(base_path: str, new_dir: str) -> str:
@@ -77,14 +67,16 @@ def download_file_new(url: str, path: str, formats: list):
                         return True
                 else:
                     print(f"File [{url}] is under 10KB in size, skipping...")
+                    logging.info(f"Skipped under 10KB [{url}]")
                     return False
             else:
                 print(f"File [{filename}] already exists, skipping...")
+                logging.info(f"Skipped existing [{url}] [{path}]")
                 return False
     except Exception as error:
         # FIXME fix this band-aid exception!
         print(f"Downloading [{url}] has failed, skipping...")
-        print(error)
+        logging.error(error)
         return False
 
 

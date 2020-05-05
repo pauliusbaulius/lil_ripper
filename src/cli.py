@@ -5,13 +5,14 @@ import os
 import sys
 from src import ripper
 from src.modules import fourchan, reddit
+import logging
+import time
 
 DEFAULT_DOWNLOAD_FORMATS = ["jpg", "jpeg", "png", "gif", "mp4", "webm"]
 DEFAULT_DOWNLOAD_PATH = os.getcwd()
 
 
 def main():
-    # TODO logger init here!
     args = get_args()
     handle_args(args)
 
@@ -44,21 +45,40 @@ def get_args(arguments=None):
                         nargs="+",
                         help="Formats to consider. Default downloads all.",
                         default=DEFAULT_DOWNLOAD_FORMATS)
+    parser.add_argument("-l", "--log",
+                        dest="level",
+                        choices=["DEBUG", "INFO"], default="WARNING",
+                        help="Logging level. Default is WARNING."
+                        )
     arguments = parser.parse_args(arguments)
     return arguments
 
 
 def handle_args(arguments):
-    # print(arguments) # TODO debug, remove when building package!
+    #print(arguments)
 
+    # Start logger with user specified level or default.
+    start_logger(getattr(logging, arguments.level))
+
+    # Handle ripping choice
     if arguments.reddit is not None:
         handle_reddit(arguments)
     if arguments.fourchan is not None:
         handle_fourchan(arguments)
 
 
+def start_logger(level):
+    os.mkdir("logs")
+    logging.basicConfig(level=level,
+                        filename=time.strftime("logs/%Y%m%d_lilripper.log"),
+                        format="%(asctime)s:%(module)s:%(funcName)s:"
+                               "%(lineno)d:%(levelname)s:%(message)s"
+                        )
+
+
 def handle_reddit(arguments):
     print(f"Starting ripping: [{', '.join(arguments.reddit)}]")
+    logging.info(f"Starting ripping: [{', '.join(arguments.reddit)}]")
     subreddits = []
     for item in arguments.reddit:
         # If it is a csv file, extract subreddits to a list.
@@ -76,6 +96,7 @@ def handle_reddit(arguments):
 
 def handle_fourchan(arguments):
     print(f"Starting ripping: [{', '.join(arguments.fourchan)}]")
+    logging.info(f"Starting ripping: [{', '.join(arguments.fourchan)}]")
     for url in arguments.fourchan:
         fourchan.download_thread(url=url,
                                  download_path=arguments.download_path,

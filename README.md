@@ -78,6 +78,13 @@ Following arguments can be passed:
 	If you wan't gifvs, you can pass mp4 to -f.
 	
 	-f jpg png, -f webm, --formats gif mp4 webm
+	
+-l, --log
+	Level of logging, default will only log WARNING messages and up.
+	Takes DEBUG or INFO as arguments. Logs are saved in logs/ direcotry in the root 
+	directory of the project.
+	
+	-l DEBUG, if you want to see a lot of information how the program works.
 ```
 
 
@@ -109,21 +116,24 @@ python3 -m lilripper -r idiotsincars -f webm -d /home/boolean/Downloads
 ## Roadmap <a name="roadmap">
 
 - [x] fix -f flag, since it does not work at all anymore.
-- [ ] A separate queue for gfycat videos that waits longer between requests to evade IP ban or something that at least reduces the frequency of bans.
 - [x] 4chan thread media archiving, under -c flag.
-- [ ] pinterest board media archiving, under -p flag.
-- [ ] add pytest tests, something I have to learn to write.
+- [x] add pytest tests WIP
 - [ ] a better way to quit program, since ctrl+c does not cancel all threads at once.
 - [ ] show status how long it took to generate links and download each file. maybe a progress bar?
   - [x] download time
   - [ ] generation time
-  - [ ] progress bar
-- [ ] add image/video compression option to reduce size of media on disk in exchange for cpu usage and electricity.
+- [ ] maybe add image/video compression option to reduce size of media on disk in exchange for cpu usage and electricity?
 - [ ] skip v.reddit videos if user has no ffmpeg, check for it first.
 
 
 
 ## Changelog <a name="changelog">
+
+[0.0.8]
+
+- -l is added. Lil ripper will make logs as of this version.
+
+
 
 [0.0.7] 
 
