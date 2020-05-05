@@ -68,7 +68,7 @@ def handle_args(arguments):
 
 
 def start_logger(level):
-    os.mkdir("logs")
+    os.makedirs("logs", exist_ok=True)
     logging.basicConfig(level=level,
                         filename=time.strftime("logs/%Y%m%d_lilripper.log"),
                         format="%(asctime)s:%(module)s:%(funcName)s:"
